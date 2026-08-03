@@ -3,24 +3,26 @@ import { Navigate, Outlet, Link, useNavigate, useLocation } from 'react-router-d
 import { useAuthStore } from '../../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_URL } from '../../lib/api';
-import { LayoutDashboard, ShoppingBag, Users, User, LogOut, ArrowUpRight, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, User, LogOut, ArrowUpRight, ArrowLeft, ShieldCheck, UserCog } from 'lucide-react';
 
 const AdminLayout = () => {
-  const { token, logout, name } = useAuthStore();
+  const { token, isSuperAdmin, permissions, logout, name } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [stats, setStats] = useState({ products: 0 });
   const [loggingOut, setLoggingOut] = useState(false);
+  const isStaff = isSuperAdmin || permissions.length > 0;
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || !isStaff) return;
     fetch(`${API_URL}/api/products`)
       .then(r => r.json())
       .then(data => setStats({ products: data.length }))
       .catch(() => {});
-  }, [token]);
+  }, [token, isStaff]);
 
   if (!token) return <Navigate to="/login" replace />;
+  if (!isStaff) return <Navigate to="/" replace />;
 
   const handleLogout = () => {
     setLoggingOut(true);
@@ -31,12 +33,16 @@ const AdminLayout = () => {
     }, 1200);
   };
 
+  const hasPerm = (perm) => isSuperAdmin || permissions.includes(perm);
+
   const navItems = [
-    { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/admin/productos', label: 'Productos', icon: ShoppingBag },
-    { to: '/admin/clientes', label: 'Clientes', icon: Users },
-    { to: '/admin/perfil', label: 'Mi Perfil', icon: User },
-  ];
+    { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, show: true },
+    { to: '/admin/productos', label: 'Productos', icon: ShoppingBag, show: hasPerm('products.manage') },
+    { to: '/admin/clientes', label: 'Clientes', icon: Users, show: hasPerm('customers.view') },
+    { to: '/admin/roles', label: 'Roles', icon: ShieldCheck, show: hasPerm('roles.manage') },
+    { to: '/admin/personal', label: 'Personal', icon: UserCog, show: hasPerm('staff.manage') },
+    { to: '/admin/perfil', label: 'Mi Perfil', icon: User, show: true },
+  ].filter((item) => item.show);
 
   return (
     <div className="min-h-screen bg-[#080808] flex text-white font-urban">

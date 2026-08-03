@@ -5,7 +5,7 @@ import { User, Phone, Cake, Briefcase, Mail, ShieldCheck, Lock, ArrowRight, Chec
 import { API_URL } from "../lib/api"
 
 const Perfil = () => {
-  const { token, role } = useAuthStore()
+  const { token, isSuperAdmin, permissions } = useAuthStore()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -104,7 +104,7 @@ const Perfil = () => {
   if (loading) return <div className="min-h-screen bg-[#080808] pt-44 px-6 text-white/30 font-urban uppercase tracking-widest animate-pulse flex items-center justify-center">Sincronizando...</div>
   if (!user) return <div className="min-h-screen bg-[#080808] pt-44 px-6 text-white/30 font-urban uppercase tracking-widest flex items-center justify-center">Error al cargar datos.</div>
 
-  const isAdmin = role === 'ADMIN'
+  const isAdmin = isSuperAdmin || permissions.length > 0
 
   return (
     <main className="min-h-screen bg-[#080808] text-white pt-44 px-6 pb-32 relative overflow-hidden">

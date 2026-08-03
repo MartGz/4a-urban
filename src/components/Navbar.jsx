@@ -12,7 +12,8 @@ const Navbar = () => {
   const [loggingOut, setLoggingOut] = useState(false)
   const navigate = useNavigate()
   const count = useCartStore((s) => s.getCount())
-  const { token, role, logout, name } = useAuthStore()
+  const { token, isSuperAdmin, permissions, logout, name } = useAuthStore()
+  const isStaff = isSuperAdmin || permissions.length > 0
 
   const handleLogout = () => {
     setLoggingOut(true)
@@ -86,10 +87,10 @@ const Navbar = () => {
             {token ? (
               <div className="hidden md:flex items-center gap-4 border-l border-white/10 pl-4">
                 <div className="text-right">
-                  <p className="text-[9px] text-white/30 uppercase tracking-widest leading-none mb-1">{role === 'ADMIN' ? 'Administrador' : 'Cliente'}</p>
+                  <p className="text-[9px] text-white/30 uppercase tracking-widest leading-none mb-1">{isStaff ? 'Staff' : 'Cliente'}</p>
                   <p className="text-[11px] text-white font-urban uppercase tracking-widest">{name || 'Usuario'}</p>
                 </div>
-                {role !== 'ADMIN' && (
+                {!isStaff && (
                   <Link to="/mis-compras" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition group" title="Mis Pedidos">
                     <Package size={18} className="text-white/40 group-hover:text-white transition" />
                   </Link>
@@ -97,7 +98,7 @@ const Navbar = () => {
                 <Link to="/perfil" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition group" title="Mi Perfil">
                   <User size={18} className="text-white/40 group-hover:text-white transition" />
                 </Link>
-                {role === 'ADMIN' && (
+                {isStaff && (
                   <Link to="/admin" className="font-urban text-[9px] uppercase tracking-[0.2em] bg-white text-black px-3 py-1.5 rounded-lg hover:bg-gray-200 transition">Panel</Link>
                 )}
                 <button onClick={handleLogout} className="p-2 text-white/20 hover:text-rose-500 transition">

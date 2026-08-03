@@ -3,6 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import { PERMISSION_KEYS } from './permissions.js';
 
 dotenv.config();
 const useSsl = /neon\.tech|sslmode=require/.test(process.env.DATABASE_URL || '');
@@ -16,15 +17,39 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('Iniciando el script de seed...');
 
+  // Roles de sistema
+  const superAdminRole = await prisma.role.upsert({
+    where: { name: 'SUPER_ADMIN' },
+    update: {},
+    create: {
+      name: 'SUPER_ADMIN',
+      description: 'Acceso total a la plataforma',
+      isSystem: true,
+      isSuperAdmin: true,
+      permissions: PERMISSION_KEYS,
+    },
+  });
+  await prisma.role.upsert({
+    where: { name: 'CUSTOMER' },
+    update: {},
+    create: {
+      name: 'CUSTOMER',
+      description: 'Cliente de la tienda',
+      isSystem: true,
+      isSuperAdmin: false,
+      permissions: [],
+    },
+  });
+
   // Crear o actualizar el usuario administrador
   const adminPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@4aurban.com' },
-    update: { password: adminPassword },
+    update: { password: adminPassword, roleId: superAdminRole.id },
     create: {
       email: 'admin@4aurban.com',
       password: adminPassword,
-      role: 'ADMIN',
+      roleId: superAdminRole.id,
     },
   });
   console.log('Admin creado:', admin.email);

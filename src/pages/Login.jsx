@@ -27,8 +27,9 @@ const Login = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        setAuth(data.token, data.role, data.name);
-        navigate(data.role === 'ADMIN' ? '/admin' : '/catalogo');
+        setAuth(data);
+        const isStaff = data.isSuperAdmin || (data.permissions && data.permissions.length > 0);
+        navigate(isStaff ? '/admin' : '/catalogo');
       } else {
         setError(data.error || 'Credenciales incorrectas');
       }

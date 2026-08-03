@@ -63,8 +63,8 @@ const Chatbox = () => {
   const [input, setInput] = useState("")
   const [typing, setTyping] = useState(false)
   const endRef = useRef(null)
-  const { token, role } = useAuthStore()
-  const isAdmin = role === "ADMIN"
+  const { token, isSuperAdmin, permissions } = useAuthStore()
+  const isAdmin = isSuperAdmin || permissions.includes("products.manage")
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }) }, [messages, typing])
 
