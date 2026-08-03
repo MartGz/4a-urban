@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Link } from "react-router-dom"
 import { useCartStore } from "../store/cartStore"
 import { API_URL } from "../lib/api"
+import { Check, ArrowRight, Package, Rocket, Handshake, Briefcase, Heart } from "lucide-react"
 
 const WHATSAPP = "573337071742"
 const INSTAGRAM = "https://www.instagram.com/4a_urban"
@@ -99,8 +100,8 @@ const Home = () => {
                       <p className="text-white/40 font-urban text-sm">${featured.precio?.toLocaleString()}</p>
                     </div>
                     <button onClick={() => handleAdd(featured)}
-                      className={`absolute top-4 right-4 px-4 py-2 font-urban text-xs uppercase tracking-widest transition-all ${added === featured.id ? "bg-green-500 text-white" : "bg-white text-black hover:bg-gray-100"}`}>
-                      {added === featured.id ? "✓ Añadido" : "+ Añadir"}
+                      className={`absolute top-4 right-4 px-4 py-2 font-urban text-xs uppercase tracking-widest transition-all flex items-center gap-1.5 ${added === featured.id ? "bg-green-500 text-white" : "bg-white text-black hover:bg-gray-100"}`}>
+                      {added === featured.id ? <><Check size={14} /> Añadido</> : "+ Añadir"}
                     </button>
                   </motion.div>
                 </AnimatePresence>
@@ -140,8 +141,8 @@ const Home = () => {
               <h2 className="font-urban text-5xl">Productos</h2>
             </div>
             <Link to="/catalogo"
-              className="font-urban text-xs uppercase tracking-widest text-white/40 hover:text-white transition border-b border-white/10 pb-1">
-              Ver todo →
+              className="font-urban text-xs uppercase tracking-widest text-white/40 hover:text-white transition border-b border-white/10 pb-1 inline-flex items-center gap-1.5">
+              Ver todo <ArrowRight size={12} />
             </Link>
           </div>
 
@@ -163,8 +164,8 @@ const Home = () => {
                       <img src="/logo.png" alt="4A" className="w-14 h-14 object-contain opacity-10" />
                     )}
                     <button onClick={() => handleAdd(p)}
-                      className={`absolute bottom-0 w-full py-3 font-urban text-xs uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-300 ${added === p.id ? "bg-green-500 text-white" : "bg-white text-black"}`}>
-                      {added === p.id ? "✓" : "Añadir"}
+                      className={`absolute bottom-0 w-full py-3 font-urban text-xs uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center ${added === p.id ? "bg-green-500 text-white" : "bg-white text-black"}`}>
+                      {added === p.id ? <Check size={14} /> : "Añadir"}
                     </button>
                   </div>
                   <div className="mt-3 px-1">
@@ -209,16 +210,16 @@ const Home = () => {
 
           <div className="grid grid-cols-2 gap-4">
             {[
-              { icon: "📦", title: "Proveedores", desc: "Suministra materiales para nuestras colecciones." },
-              { icon: "🚀", title: "Distribuidores", desc: "Lleva 4A Urban a tu ciudad." },
-              { icon: "🤝", title: "Aliados", desc: "Colaboraciones con artistas y marcas afines." },
-              { icon: "💼", title: "Vendedores", desc: "Únete con comisiones competitivas." },
+              { icon: Package, title: "Proveedores", desc: "Suministra materiales para nuestras colecciones." },
+              { icon: Rocket, title: "Distribuidores", desc: "Lleva 4A Urban a tu ciudad." },
+              { icon: Handshake, title: "Aliados", desc: "Colaboraciones con artistas y marcas afines." },
+              { icon: Briefcase, title: "Vendedores", desc: "Únete con comisiones competitivas." },
             ].map((item) => (
               <motion.div key={item.title}
                 whileInView={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }}
                 viewport={{ once: true }}
                 className="bg-black/40 border border-white/5 p-6 hover:border-white/15 transition">
-                <div className="text-3xl mb-3">{item.icon}</div>
+                <item.icon className="mb-3 text-white/70" size={28} />
                 <h3 className="font-urban text-lg mb-2">{item.title}</h3>
                 <p className="text-white/30 text-sm leading-relaxed">{item.desc}</p>
               </motion.div>
@@ -291,7 +292,7 @@ const Home = () => {
 
           <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/15 text-xs font-urban">© 2026 4A Urban. Todos los derechos reservados.</p>
-            <p className="text-white/15 text-xs font-urban">Hecho con ❤️ en Cartagena, Colombia</p>
+            <p className="text-white/15 text-xs font-urban flex items-center gap-1.5">Hecho con <Heart size={12} className="fill-current" /> en Cartagena, Colombia</p>
           </div>
         </div>
       </footer>

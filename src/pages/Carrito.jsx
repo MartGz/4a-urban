@@ -209,8 +209,8 @@ const Carrito = () => {
               {/* Barra de envío */}
               <div className="mb-12">
                 <div className="flex justify-between text-[9px] font-urban uppercase tracking-[0.2em] mb-4">
-                  <span className={total >= metaEnvio ? "text-emerald-400 font-bold" : "text-white/30"}>
-                    {total >= metaEnvio ? "✓ Envío Gratis Desbloqueado" : `Te faltan $${(metaEnvio - total).toLocaleString()}`}
+                  <span className={`flex items-center gap-1.5 ${total >= metaEnvio ? "text-emerald-400 font-bold" : "text-white/30"}`}>
+                    {total >= metaEnvio ? <><Check size={12} /> Envío Gratis Desbloqueado</> : `Te faltan $${(metaEnvio - total).toLocaleString()}`}
                   </span>
                   <span className="text-white/10">{Math.round(progresoEnvio)}%</span>
                 </div>

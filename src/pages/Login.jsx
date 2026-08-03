@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { API_URL } from '../lib/api';
 
 const WHATSAPP_NUMBER = "573337071742";
@@ -103,9 +104,9 @@ const Login = () => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 mb-8 rounded-xl text-[10px] uppercase tracking-widest font-urban text-center"
+                className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 mb-8 rounded-xl text-[10px] uppercase tracking-widest font-urban text-center flex items-center justify-center gap-2"
               >
-                ⚠️ {error}
+                <AlertCircle size={14} className="shrink-0" /> {error}
               </motion.div>
             )}
           </AnimatePresence>
@@ -169,8 +170,8 @@ const Login = () => {
           </button>
 
           <div className="mt-12 text-center">
-            <Link to="/" className="text-white/20 hover:text-white transition font-urban text-[10px] uppercase tracking-widest border-b border-transparent hover:border-white/20 pb-1">
-              ← Volver al inicio
+            <Link to="/" className="text-white/20 hover:text-white transition font-urban text-[10px] uppercase tracking-widest border-b border-transparent hover:border-white/20 pb-1 inline-flex items-center gap-2">
+              <ArrowLeft size={12} /> Volver al inicio
             </Link>
           </div>
         </motion.div>

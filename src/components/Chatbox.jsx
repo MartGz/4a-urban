@@ -2,19 +2,20 @@ import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useAuthStore } from "../store/authStore"
 import { API_URL } from "../lib/api"
+import { X, Send, ShieldCheck, CheckCircle2, XCircle } from "lucide-react"
 
 const WHATSAPP_NUMBER = "573337071742"
 
 // ── Bot responses ──────────────────────────────────────────────────────────────
 const FAQS = {
-  hola: "¡Hola! 👋 Soy el asistente de **4A Urban**. Puedo ayudarte con preguntas sobre productos, envíos y pagos.\n\n¿En qué te puedo ayudar hoy?",
+  hola: "¡Hola! Soy el asistente de **4A Urban**. Puedo ayudarte con preguntas sobre productos, envíos y pagos.\n\n¿En qué te puedo ayudar hoy?",
   precio: "Nuestros productos van desde **$80.000 hasta $90.000 COP**. Puedes ver el catálogo completo en la sección Catálogo.",
   talla: "Manejamos tallas **S, M, L y XL** en todos nuestros productos.",
-  envio: "Los envíos se coordinan por **WhatsApp** 📦. ¡Hacemos envíos a todo Colombia!",
+  envio: "Los envíos se coordinan por **WhatsApp**. ¡Hacemos envíos a todo Colombia!",
   pago: "Aceptamos **efectivo, transferencia y Nequi**. Todo se coordina por WhatsApp.",
   pedido: "Agrega productos al carrito y al finalizar se abrirá WhatsApp automáticamente con tu pedido.",
   proveedor: "¿Te interesa ser proveedor? Contáctanos por WhatsApp o visita la sección **Trabaja con nosotros** en la página de inicio.",
-  default: "No entendí bien tu pregunta 🤔. Puedes preguntar sobre **precios**, **tallas**, **envíos**, **pagos** o escribirnos por WhatsApp.",
+  default: "No entendí bien tu pregunta. Puedes preguntar sobre **precios**, **tallas**, **envíos**, **pagos** o escribirnos por WhatsApp.",
 }
 
 const getPublicResponse = (msg) => {
@@ -57,7 +58,7 @@ const renderMd = (text) => ({ __html: escapeHtml(text).replace(/\*\*(.*?)\*\*/g,
 const Chatbox = () => {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([
-    { id: 1, from: "bot", text: "¡Hola! 👋 Soy el asistente de **4A Urban**. ¿En qué te puedo ayudar hoy?" },
+    { id: 1, from: "bot", text: "¡Hola! Soy el asistente de **4A Urban**. ¿En qué te puedo ayudar hoy?" },
   ])
   const [input, setInput] = useState("")
   const [typing, setTyping] = useState(false)
@@ -67,7 +68,7 @@ const Chatbox = () => {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }) }, [messages, typing])
 
-  const addMsg = (from, text) => setMessages((prev) => [...prev, { id: Date.now() + Math.random(), from, text }])
+  const addMsg = (from, text, icon = null) => setMessages((prev) => [...prev, { id: Date.now() + Math.random(), from, text, icon }])
 
   const sendMessage = async (e) => {
     e.preventDefault()
@@ -90,13 +91,13 @@ const Chatbox = () => {
           setTyping(false)
           if (res.ok) {
             const p = await res.json()
-            addMsg("bot", `✅ Producto creado correctamente:\n\n**${p.nombre}** — $${p.precio.toLocaleString()}\nTallas: ${p.talla}\n\nYa aparece en el catálogo público.`)
+            addMsg("bot", `Producto creado correctamente:\n\n**${p.nombre}** — $${p.precio.toLocaleString()}\nTallas: ${p.talla}\n\nYa aparece en el catálogo público.`, CheckCircle2)
           } else {
-            addMsg("bot", "❌ Hubo un error al crear el producto. Verifica los datos e inténtalo de nuevo.")
+            addMsg("bot", "Hubo un error al crear el producto. Verifica los datos e inténtalo de nuevo.", XCircle)
           }
         } catch {
           setTyping(false)
-          addMsg("bot", "❌ Error de conexión con el servidor.")
+          addMsg("bot", "Error de conexión con el servidor.", XCircle)
         }
         return
       }
@@ -131,28 +132,34 @@ const Chatbox = () => {
               <img src="/logo.png" alt="4A" className="w-9 h-9 object-contain" />
               <div className="flex-1">
                 <p className="text-white font-urban text-sm leading-none">4A Urban</p>
-                <p className="text-green-400 text-xs mt-0.5">● En línea</p>
+                <p className="text-green-400 text-xs mt-0.5 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400" /> En línea
+                </p>
               </div>
-              <button onClick={() => setOpen(false)} className="text-white/30 hover:text-white transition text-lg">✕</button>
+              <button onClick={() => setOpen(false)} className="text-white/30 hover:text-white transition">
+                <X size={18} />
+              </button>
             </div>
 
             {/* Mensajes */}
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scrollbar-hide">
               {isAdmin && (
-                <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/40 font-urban">
-                  🛡️ Modo Admin — escribe <strong className="text-white/60">ayuda</strong> para ver comandos
+                <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/40 font-urban flex items-center gap-2">
+                  <ShieldCheck size={14} className="shrink-0" /> Modo Admin — escribe <strong className="text-white/60">ayuda</strong> para ver comandos
                 </div>
               )}
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
                   <div
-                    className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                    className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed flex items-start gap-2 ${
                       msg.from === "user"
                         ? "bg-white text-black rounded-br-none"
                         : "bg-white/8 text-white rounded-bl-none border border-white/5"
                     }`}
-                    dangerouslySetInnerHTML={renderMd(msg.text)}
-                  />
+                  >
+                    {msg.icon && <msg.icon size={15} className="shrink-0 mt-0.5" />}
+                    <span dangerouslySetInnerHTML={renderMd(msg.text)} />
+                  </div>
                 </div>
               ))}
               {typing && (
@@ -191,8 +198,8 @@ const Chatbox = () => {
                 placeholder={isAdmin ? "crear producto / pregunta..." : "Escribe tu pregunta..."}
                 className="flex-1 bg-white/5 border border-white/10 text-white text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:border-white/30 placeholder:text-white/20"
               />
-              <button type="submit" className="w-10 h-10 bg-white text-black rounded-xl flex items-center justify-center hover:bg-gray-100 transition shrink-0 text-sm font-bold">
-                ➤
+              <button type="submit" className="w-10 h-10 bg-white text-black rounded-xl flex items-center justify-center hover:bg-gray-100 transition shrink-0">
+                <Send size={16} />
               </button>
             </form>
           </motion.div>
@@ -205,7 +212,7 @@ const Chatbox = () => {
         className="w-14 h-14 bg-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform overflow-hidden border-2 border-white/20"
       >
         {open ? (
-          <span className="text-black text-xl font-bold">✕</span>
+          <X size={24} className="text-black" />
         ) : (
           <img src="/logo-dark.png" alt="Chat" className="w-12 h-12 object-cover rounded-full" />
         )}
