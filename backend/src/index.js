@@ -10,6 +10,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import https from 'https';
+import multer from 'multer';
 import { PERMISSIONS, PERMISSION_KEYS } from './permissions.js';
 
 dotenv.config();
@@ -129,6 +130,13 @@ const requirePermission = (permission) => (req, res, next) => {
   if (req.user?.isSuperAdmin || req.user?.permissions?.includes(permission)) return next();
   return res.sendStatus(403);
 };
+
+// Imágenes de galería: se guardan en la propia base de datos (sin servicio externo), máx. 5MB.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith('image/')),
+});
 
 app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
@@ -305,6 +313,60 @@ app.post('/api/staff', authenticateToken, requirePermission('staff.manage'), asy
     const emailSent = await sendInviteEmail(email, name, link);
     res.status(201).json({ id: user.id, email: user.email, name: user.name, emailSent });
   } catch (err) { console.error(err); res.status(500).json({ error: 'Error creando el usuario' }); }
+});
+
+// ── Galería ──────────────────────────────────────────────────────────────────
+app.get('/api/gallery', async (req, res) => {
+  const images = await prisma.galleryImage.findMany({
+    select: { id: true, caption: true, position: true, createdAt: true },
+    orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
+  });
+  res.json(images);
+});
+
+app.get('/api/gallery/:id/image', async (req, res) => {
+  const image = await prisma.galleryImage.findUnique({ where: { id: Number(req.params.id) } });
+  if (!image) return res.sendStatus(404);
+  res.set('Content-Type', image.mimeType);
+  res.set('Cache-Control', 'public, max-age=31536000, immutable');
+  res.send(Buffer.from(image.data));
+});
+
+app.post('/api/gallery', authenticateToken, requirePermission('gallery.manage'), upload.single('image'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'La imagen es requerida' });
+  try {
+    const { caption } = req.body;
+    const maxPosition = await prisma.galleryImage.aggregate({ _max: { position: true } });
+    const image = await prisma.galleryImage.create({
+      data: {
+        data: req.file.buffer,
+        mimeType: req.file.mimetype,
+        caption: caption || null,
+        position: (maxPosition._max.position ?? -1) + 1,
+      },
+      select: { id: true, caption: true, position: true, createdAt: true },
+    });
+    res.status(201).json(image);
+  } catch (err) { console.error(err); res.status(500).json({ error: 'Error subiendo la imagen' }); }
+});
+
+app.put('/api/gallery/:id', authenticateToken, requirePermission('gallery.manage'), async (req, res) => {
+  const { caption, position } = req.body;
+  try {
+    const updated = await prisma.galleryImage.update({
+      where: { id: Number(req.params.id) },
+      data: { caption, position: position != null ? Number(position) : undefined },
+      select: { id: true, caption: true, position: true, createdAt: true },
+    });
+    res.json(updated);
+  } catch { res.sendStatus(404); }
+});
+
+app.delete('/api/gallery/:id', authenticateToken, requirePermission('gallery.manage'), async (req, res) => {
+  try {
+    await prisma.galleryImage.delete({ where: { id: Number(req.params.id) } });
+    res.status(204).send();
+  } catch { res.sendStatus(404); }
 });
 
 app.get('/api/products', async (req, res) => {

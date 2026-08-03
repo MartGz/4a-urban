@@ -12,6 +12,7 @@ import CustomersManager from "./pages/admin/CustomersManager"
 import Dashboard from "./pages/admin/Dashboard"
 import RolesManager from "./pages/admin/RolesManager"
 import StaffManager from "./pages/admin/StaffManager"
+import GalleryManager from "./pages/admin/GalleryManager"
 import MisCompras from "./pages/MisCompras"
 import Perfil from "./pages/Perfil"
 import SetPassword from "./pages/SetPassword"
@@ -36,6 +37,7 @@ const App = () => {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="productos" element={<ProductsManager />} />
+          <Route path="galeria" element={<GalleryManager />} />
           <Route path="clientes" element={<CustomersManager />} />
           <Route path="roles" element={<RolesManager />} />
           <Route path="personal" element={<StaffManager />} />

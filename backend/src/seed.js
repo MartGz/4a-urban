@@ -20,7 +20,7 @@ async function main() {
   // Roles de sistema
   const superAdminRole = await prisma.role.upsert({
     where: { name: 'SUPER_ADMIN' },
-    update: {},
+    update: { permissions: PERMISSION_KEYS },
     create: {
       name: 'SUPER_ADMIN',
       description: 'Acceso total a la plataforma',

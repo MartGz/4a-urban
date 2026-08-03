@@ -3,7 +3,7 @@ import { Navigate, Outlet, Link, useNavigate, useLocation } from 'react-router-d
 import { useAuthStore } from '../../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_URL } from '../../lib/api';
-import { LayoutDashboard, ShoppingBag, Users, User, LogOut, ArrowUpRight, ArrowLeft, ShieldCheck, UserCog } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, User, LogOut, ArrowUpRight, ArrowLeft, ShieldCheck, UserCog, Images } from 'lucide-react';
 
 const AdminLayout = () => {
   const { token, isSuperAdmin, permissions, logout, name } = useAuthStore();
@@ -38,6 +38,7 @@ const AdminLayout = () => {
   const navItems = [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, show: true },
     { to: '/admin/productos', label: 'Productos', icon: ShoppingBag, show: hasPerm('products.manage') },
+    { to: '/admin/galeria', label: 'Galería', icon: Images, show: hasPerm('gallery.manage') },
     { to: '/admin/clientes', label: 'Clientes', icon: Users, show: hasPerm('customers.view') },
     { to: '/admin/roles', label: 'Roles', icon: ShieldCheck, show: hasPerm('roles.manage') },
     { to: '/admin/personal', label: 'Personal', icon: UserCog, show: hasPerm('staff.manage') },

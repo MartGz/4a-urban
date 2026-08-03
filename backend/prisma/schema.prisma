@@ -51,6 +51,15 @@ model User {
   orders    Order[]
 }
 
+model GalleryImage {
+  id        Int      @id @default(autoincrement())
+  data      Bytes
+  mimeType  String
+  caption   String?
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
 model Order {
   id                 Int         @id @default(autoincrement())
   userId             Int
