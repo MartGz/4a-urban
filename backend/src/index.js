@@ -356,6 +356,31 @@ app.post('/api/staff', authenticateToken, requirePermission('staff.manage'), asy
   } catch (err) { console.error(err); res.status(500).json({ error: 'Error creando el usuario' }); }
 });
 
+app.post('/api/staff/:id/resend', authenticateToken, requirePermission('staff.manage'), async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: Number(req.params.id) }, include: { role: true } });
+    if (!user || user.role.name === 'CUSTOMER') return res.sendStatus(404);
+    if (user.password) return res.status(400).json({ error: 'Este usuario ya activó su cuenta' });
+
+    const inviteToken = randomBytes(32).toString('hex');
+    const inviteTokenExpires = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    await prisma.user.update({ where: { id: user.id }, data: { inviteToken, inviteTokenExpires } });
+    const link = `${FRONTEND_URL}/set-password?token=${inviteToken}`;
+    sendInviteEmail(user.email, user.name, link);
+    res.json({ message: 'Invitación reenviada' });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'Error reenviando la invitación' }); }
+});
+
+app.delete('/api/staff/:id', authenticateToken, requirePermission('staff.manage'), async (req, res) => {
+  if (Number(req.params.id) === req.user.id) return res.status(400).json({ error: 'No puedes eliminar tu propio usuario' });
+  try {
+    const user = await prisma.user.findUnique({ where: { id: Number(req.params.id) }, include: { role: true } });
+    if (!user || user.role.name === 'CUSTOMER') return res.sendStatus(404);
+    await prisma.user.delete({ where: { id: user.id } });
+    res.status(204).send();
+  } catch (err) { console.error(err); res.status(500).json({ error: 'Error eliminando el usuario' }); }
+});
+
 // ── Galería ──────────────────────────────────────────────────────────────────
 app.get('/api/gallery', async (req, res) => {
   const images = await prisma.galleryImage.findMany({

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, CheckCircle2, Clock } from 'lucide-react';
+import { Mail, CheckCircle2, Clock, Send, Trash2 } from 'lucide-react';
 import { API_URL } from '../../lib/api';
 
 const emptyForm = { email: '', name: '', roleId: '' };
@@ -14,6 +14,7 @@ const StaffManager = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [actingId, setActingId] = useState(null);
   const { token } = useAuthStore();
 
   useEffect(() => { fetchAll(); }, []);
@@ -55,6 +56,43 @@ const StaffManager = () => {
     }
   };
 
+  const handleResend = async (u) => {
+    setActingId(u.id);
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetch(`${API_URL}/api/staff/${u.id}/resend`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setMessage(`Invitación reenviada a ${u.email}.`);
+      else setError(data.error || 'No se pudo reenviar la invitación');
+    } catch {
+      setError('Error de conexión con el servidor');
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  const handleDelete = async (u) => {
+    if (!confirm(`¿Eliminar a ${u.name || u.email}? Esto borra su acceso por completo.`)) return;
+    setActingId(u.id);
+    setError('');
+    try {
+      const res = await fetch(`${API_URL}/api/staff/${u.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) fetchAll();
+      else { const data = await res.json(); setError(data.error || 'No se pudo eliminar el usuario'); }
+    } catch {
+      setError('Error de conexión con el servidor');
+    } finally {
+      setActingId(null);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -73,6 +111,11 @@ const StaffManager = () => {
       {message && (
         <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 mb-8 rounded-xl text-sm flex items-center gap-3">
           <Mail size={16} /> {message}
+        </div>
+      )}
+      {error && !showForm && (
+        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 mb-8 rounded-xl text-sm">
+          {error}
         </div>
       )}
 
@@ -130,6 +173,7 @@ const StaffManager = () => {
               <th className="px-8 py-5 font-normal">Email</th>
               <th className="px-8 py-5 font-normal">Rol</th>
               <th className="px-8 py-5 font-normal">Estado</th>
+              <th className="px-8 py-5 font-normal text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="text-sm">
@@ -146,6 +190,20 @@ const StaffManager = () => {
                   ) : (
                     <span className="flex items-center gap-2 text-amber-400 text-xs uppercase tracking-widest"><Clock size={14} /> Invitación pendiente</span>
                   )}
+                </td>
+                <td className="px-8 py-6 text-right">
+                  <div className="flex justify-end gap-2">
+                    {!u.activo && (
+                      <button onClick={() => handleResend(u)} disabled={actingId === u.id}
+                        className="bg-white/5 border border-white/10 text-white p-2.5 rounded-lg hover:bg-white/10 transition disabled:opacity-40" title="Reenviar invitación">
+                        <Send size={14} />
+                      </button>
+                    )}
+                    <button onClick={() => handleDelete(u)} disabled={actingId === u.id}
+                      className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-2.5 rounded-lg hover:bg-rose-500/20 transition disabled:opacity-40" title="Eliminar">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
