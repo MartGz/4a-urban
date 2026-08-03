@@ -16,6 +16,7 @@ import GalleryManager from "./pages/admin/GalleryManager"
 import MisCompras from "./pages/MisCompras"
 import Perfil from "./pages/Perfil"
 import SetPassword from "./pages/SetPassword"
+import ForgotPassword from "./pages/ForgotPassword"
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
         {/* Login */}
         <Route path="/login" element={<Login />} />
         <Route path="/set-password" element={<SetPassword />} />
+        <Route path="/olvide-password" element={<ForgotPassword />} />
 
         {/* Rutas de Admin */}
         <Route path="/admin" element={<AdminLayout />}>

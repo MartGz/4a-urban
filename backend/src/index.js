@@ -212,6 +212,42 @@ app.post('/api/auth/reset-password', authLimiter, authenticateToken, async (req,
   res.json({ message: 'Contraseña actualizada' });
 });
 
+// Recuperación de contraseña sin sesión iniciada (login perdido).
+app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
+  const { email, method } = req.body;
+  if (!email) return res.status(400).json({ error: 'El email es requerido' });
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    // Respuesta genérica siempre, para no revelar si el correo existe o no.
+    if (user && user.password) {
+      const code = generateResetCode();
+      const expires = new Date(Date.now() + 10 * 60 * 1000);
+      await prisma.user.update({ where: { id: user.id }, data: { resetCode: code, resetCodeExpires: expires } });
+      if (method === 'WHATSAPP' && user.phone) {
+        sendWhatsApp(user.phone, `Hola ${user.name || 'Usuario'}, tu código de seguridad para 4A Urban es: ${code}`);
+      } else {
+        await sendResetCodeEmail(user.email, user.name, code);
+      }
+    }
+    res.json({ message: 'Si el correo existe, te enviamos un código de verificación' });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'Error en la solicitud' }); }
+});
+
+app.post('/api/auth/reset-password-public', authLimiter, async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  if (!email || !code || !newPassword) return res.status(400).json({ error: 'Email, código y nueva contraseña son requeridos' });
+  if (newPassword.length < 8) return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.resetCode || user.resetCode !== code || user.resetCodeExpires < new Date()) {
+      return res.status(400).json({ error: 'Código inválido o expirado' });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({ where: { id: user.id }, data: { password: hashedPassword, resetCode: null, resetCodeExpires: null } });
+    res.json({ message: 'Contraseña actualizada' });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'Error actualizando la contraseña' }); }
+});
+
 app.get('/api/users/me', authenticateToken, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({

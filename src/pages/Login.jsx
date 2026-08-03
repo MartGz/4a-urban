@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { API_URL } from '../lib/api';
 
-const WHATSAPP_NUMBER = "573337071742";
-
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -127,13 +125,12 @@ const Login = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label className="block text-white/30 text-[10px] uppercase tracking-[0.2em] font-urban">Password</label>
-                <button
-                  type="button"
-                  onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola, olvidé mi contraseña de 4A Urban y necesito ayuda para recuperarla.')}`, '_blank')}
+                <Link
+                  to="/olvide-password"
                   className="text-white/20 text-[10px] uppercase tracking-widest hover:text-white transition"
                 >
                   ¿Olvidaste tu contraseña?
-                </button>
+                </Link>
               </div>
               <input
                 type="password"
