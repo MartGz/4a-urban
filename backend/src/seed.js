@@ -1,0 +1,62 @@
+import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
+import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const useSsl = /neon\.tech|sslmode=require/.test(process.env.DATABASE_URL || '');
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: useSsl ? { rejectUnauthorized: false } : undefined,
+});
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
+
+async function main() {
+  console.log('Iniciando el script de seed...');
+
+  // Crear o actualizar el usuario administrador
+  const adminPassword = await bcrypt.hash('admin123', 10);
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@4aurban.com' },
+    update: { password: adminPassword },
+    create: {
+      email: 'admin@4aurban.com',
+      password: adminPassword,
+      role: 'ADMIN',
+    },
+  });
+  console.log('Admin creado:', admin.email);
+
+  // Crear productos de prueba si no hay ninguno
+  const productsCount = await prisma.product.count();
+  if (productsCount === 0) {
+    const defaultProducts = [
+      { nombre: "Camiseta 4A Classic", precio: 80000, talla: "M/L/XL" },
+      { nombre: "Camiseta Urban Black", precio: 85000, talla: "M/L/XL" },
+      { nombre: "Camiseta Street White", precio: 80000, talla: "M/L/XL" },
+      { nombre: "Camiseta OG Logo", precio: 90000, talla: "M/L/XL" },
+    ];
+
+    for (const prod of defaultProducts) {
+      await prisma.product.create({
+        data: prod,
+      });
+    }
+    console.log('Productos por defecto creados.');
+  } else {
+    console.log('Ya existen productos en la base de datos.');
+  }
+
+  console.log('Seed completado.');
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

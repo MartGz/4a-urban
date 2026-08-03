@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id        Int         @id @default(autoincrement())
+  nombre    String
+  precio    Float
+  talla     String
+  imageUrl  String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  orderItems OrderItem[]
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String?  // Opcional para Google Login
+  googleId  String?  @unique
+  name      String?
+  phone     String?
+  birthday  DateTime?
+  documentId String?   // Documento de Identidad (CC, TI, etc.)
+  jobTitle  String?    // Campo corporativo para Admin
+  resetCode String?    // Código para cambio de clave
+  resetCodeExpires DateTime?
+  role      String   @default("CUSTOMER") // Por defecto es cliente
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Order {
+  id                 Int         @id @default(autoincrement())
+  userId             Int
+  user               User        @relation(fields: [userId], references: [id])
+  total              Float
+  status             String      @default("PENDING") // PENDING, SHIPPED, COMPLETED, CANCELLED
+  trackingNumber     String?     // Número de guía
+  emailSent          Boolean     @default(false)
+  lastNotificationAt DateTime?   
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  items              OrderItem[]
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+}

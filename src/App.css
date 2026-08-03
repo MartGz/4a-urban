@@ -1,0 +1,31 @@
+/* src/App.css */
+
+/* Animación suave para las transiciones de página */
+.page-transition-wrapper {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Estilo para los enlaces activos en el Navbar */
+.nav-link-active {
+  @apply text-white border-b border-logo;
+}
+
+/* Ajuste para que el contenido no quede debajo del Navbar fixed */
+main {
+  min-height: 100vh;
+  padding-top: 80px; /* Ajusta según el alto de tu Navbar */
+}
+
+/* Estilo para las tarjetas de producto (Efecto Glassmorphism urbano) */
+.product-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(169, 169, 169, 0.3);
+}
