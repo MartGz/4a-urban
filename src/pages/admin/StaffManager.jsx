@@ -43,11 +43,13 @@ const StaffManager = () => {
       if (res.ok) {
         setFormData(emptyForm);
         setShowForm(false);
-        setMessage(data.emailSent ? `Invitación enviada a ${data.email}` : `Usuario creado, pero no se pudo enviar el correo a ${data.email} (revisa la configuración SMTP)`);
+        setMessage(`Usuario creado. Le estamos enviando el correo de invitación a ${data.email}.`);
         fetchAll();
       } else {
         setError(data.error || 'No se pudo crear el usuario');
       }
+    } catch {
+      setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
     }

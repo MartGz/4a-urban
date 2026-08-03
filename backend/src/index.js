@@ -34,11 +34,16 @@ const prisma = new PrismaClient({ adapter });
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Configuración de Nodemailer
+// Configuración de Nodemailer. Timeouts cortos para que una conexión SMTP
+// colgada (frecuente en hosts como Render) falle rápido en vez de dejar
+// la petición esperando para siempre.
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  tls: { rejectUnauthorized: false }
+  tls: { rejectUnauthorized: false },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 // Función para enviar WhatsApp vía UltraMsg
@@ -193,7 +198,7 @@ app.post('/api/auth/request-reset', authLimiter, authenticateToken, async (req, 
   try {
     const user = await prisma.user.update({ where: { id: req.user.id }, data: { resetCode: code, resetCodeExpires: expires } });
     if (method === 'EMAIL') {
-      await sendResetCodeEmail(user.email, user.name, code);
+      sendResetCodeEmail(user.email, user.name, code);
     } else {
       const msg = `Hola ${user.name || 'Usuario'}, tu código de seguridad para 4A Urban es: ${code}`;
       sendWhatsApp(user.phone, msg);
@@ -226,7 +231,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
       if (method === 'WHATSAPP' && user.phone) {
         sendWhatsApp(user.phone, `Hola ${user.name || 'Usuario'}, tu código de seguridad para 4A Urban es: ${code}`);
       } else {
-        await sendResetCodeEmail(user.email, user.name, code);
+        sendResetCodeEmail(user.email, user.name, code);
       }
     }
     res.json({ message: 'Si el correo existe, te enviamos un código de verificación' });
@@ -346,8 +351,8 @@ app.post('/api/staff', authenticateToken, requirePermission('staff.manage'), asy
     const inviteTokenExpires = new Date(Date.now() + 48 * 60 * 60 * 1000);
     const user = await prisma.user.create({ data: { email, name, roleId: role.id, inviteToken, inviteTokenExpires } });
     const link = `${FRONTEND_URL}/set-password?token=${inviteToken}`;
-    const emailSent = await sendInviteEmail(email, name, link);
-    res.status(201).json({ id: user.id, email: user.email, name: user.name, emailSent });
+    sendInviteEmail(email, name, link);
+    res.status(201).json({ id: user.id, email: user.email, name: user.name });
   } catch (err) { console.error(err); res.status(500).json({ error: 'Error creando el usuario' }); }
 });
 

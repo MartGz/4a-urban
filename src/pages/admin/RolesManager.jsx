@@ -55,6 +55,8 @@ const RolesManager = () => {
         const err = await res.json();
         setError(err.error || 'No se pudo guardar el rol');
       }
+    } catch {
+      setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
     }
