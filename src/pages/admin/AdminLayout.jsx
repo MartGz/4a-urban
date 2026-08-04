@@ -3,7 +3,7 @@ import { Navigate, Outlet, Link, useNavigate, useLocation } from 'react-router-d
 import { useAuthStore } from '../../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_URL } from '../../lib/api';
-import { LayoutDashboard, ShoppingBag, Users, User, LogOut, ArrowUpRight, ArrowLeft, ShieldCheck, UserCog, Images } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, User, LogOut, ArrowUpRight, ArrowLeft, ShieldCheck, UserCog, Images, Menu, X } from 'lucide-react';
 
 const AdminLayout = () => {
   const { token, isSuperAdmin, permissions, logout, name } = useAuthStore();
@@ -11,6 +11,7 @@ const AdminLayout = () => {
   const location = useLocation();
   const [stats, setStats] = useState({ products: 0 });
   const [loggingOut, setLoggingOut] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const isStaff = isSuperAdmin || permissions.length > 0;
 
   useEffect(() => {
@@ -59,24 +60,39 @@ const AdminLayout = () => {
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
-      <aside className="w-72 bg-black border-r border-white/5 flex flex-col fixed h-full z-20">
+      {/* Overlay de fondo (solo móvil, cuando el menú está abierto) */}
+      <AnimatePresence>
+        {navOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setNavOpen(false)}
+            className="fixed inset-0 z-30 bg-black/70 backdrop-blur-sm lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar (drawer en móvil, fijo en desktop) */}
+      <aside className={`w-72 bg-black border-r border-white/5 flex flex-col fixed h-full z-40 transition-transform duration-300 lg:translate-x-0 ${navOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Profile Head */}
-        <div className="p-8 border-b border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
-          <div className="w-12 h-12 bg-white text-black rounded-2xl flex items-center justify-center font-bold text-xl mb-4 shadow-xl shadow-white/5">
-            {name ? name[0].toUpperCase() : 'A'}
+        <div className="p-8 border-b border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent flex items-start justify-between">
+          <div>
+            <div className="w-12 h-12 bg-white text-black rounded-2xl flex items-center justify-center font-bold text-xl mb-4 shadow-xl shadow-white/5">
+              {name ? name[0].toUpperCase() : 'A'}
+            </div>
+            <h2 className="text-xl tracking-tighter uppercase font-bold">{name || 'Admin'}</h2>
+            <p className="text-white/20 text-[10px] uppercase tracking-widest mt-1">Administrator Access</p>
           </div>
-          <h2 className="text-xl tracking-tighter uppercase font-bold">{name || 'Admin'}</h2>
-          <p className="text-white/20 text-[10px] uppercase tracking-widest mt-1">Administrator Access</p>
+          <button onClick={() => setNavOpen(false)} className="lg:hidden text-white/30 hover:text-white transition p-1">
+            <X size={20} />
+          </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-6 space-y-2 mt-4">
+        <nav className="flex-1 p-6 space-y-2 mt-4 overflow-y-auto">
           {navItems.map(item => {
             const active = location.pathname === item.to;
             const Icon = item.icon;
             return (
-              <Link key={item.to} to={item.to}
+              <Link key={item.to} to={item.to} onClick={() => setNavOpen(false)}
                 className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all group ${
                   active ? 'bg-white text-black shadow-lg shadow-white/5' : 'text-white/40 hover:text-white hover:bg-white/5'
                 }`}
@@ -106,22 +122,25 @@ const AdminLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 ml-72 min-h-screen relative">
+      <main className="flex-1 lg:ml-72 min-h-screen relative w-full">
         {/* Dynamic Header bar */}
-        <header className="h-20 border-b border-white/5 flex items-center px-12 justify-between sticky top-0 bg-[#080808]/80 backdrop-blur-md z-10">
-          <div className="flex items-center gap-4 text-white/30 text-[10px] uppercase tracking-[0.3em]">
-            <Link to="/admin" className="hover:text-white transition">4A URBAN</Link>
-            <span>/</span>
-            <span className="text-white font-bold">{navItems.find(n => n.to === location.pathname)?.label || 'System'}</span>
+        <header className="h-20 border-b border-white/5 flex items-center px-4 sm:px-6 lg:px-12 justify-between sticky top-0 bg-[#080808]/80 backdrop-blur-md z-10">
+          <div className="flex items-center gap-3 sm:gap-4 text-white/30 text-[10px] uppercase tracking-[0.3em] min-w-0">
+            <button onClick={() => setNavOpen(true)} className="lg:hidden shrink-0 text-white/50 hover:text-white transition p-1 -ml-1">
+              <Menu size={20} />
+            </button>
+            <Link to="/admin" className="hover:text-white transition hidden sm:inline shrink-0">4A URBAN</Link>
+            <span className="hidden sm:inline">/</span>
+            <span className="text-white font-bold truncate">{navItems.find(n => n.to === location.pathname)?.label || 'System'}</span>
           </div>
-          
-          <Link to="/" className="flex items-center gap-2 font-urban text-[10px] text-white/20 hover:text-white transition uppercase tracking-[0.2em] group">
-            <ArrowLeft size={12} className="group-hover:-translate-x-1 transition-transform" /> Ver Tienda <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-all" />
+
+          <Link to="/" className="flex items-center gap-2 font-urban text-[10px] text-white/20 hover:text-white transition uppercase tracking-[0.2em] group shrink-0">
+            <ArrowLeft size={12} className="group-hover:-translate-x-1 transition-transform" /> <span className="hidden sm:inline">Ver Tienda</span> <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-all hidden sm:inline" />
           </Link>
         </header>
 
         {/* Content Wrapper */}
-        <div className="p-12 max-w-7xl">
+        <div className="p-4 sm:p-6 lg:p-12 max-w-7xl">
           <Outlet />
         </div>
       </main>

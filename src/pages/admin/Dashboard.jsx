@@ -86,21 +86,21 @@ const Dashboard = () => {
   return (
     <div className="space-y-12 pb-20">
       {/* Header */}
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
         <div>
-          <h1 className="font-urban text-5xl uppercase tracking-tighter font-bold">Dashboard</h1>
+          <h1 className="font-urban text-3xl sm:text-5xl uppercase tracking-tighter font-bold">Dashboard</h1>
           <p className="text-white/20 text-xs font-urban uppercase tracking-[0.4em] mt-2">Visión general del sistema</p>
         </div>
-        <button onClick={fetchData} className="flex items-center gap-2 bg-white/5 border border-white/10 px-5 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-all font-urban text-[10px] uppercase tracking-widest group">
+        <button onClick={fetchData} className="self-start sm:self-auto flex items-center gap-2 bg-white/5 border border-white/10 px-5 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-all font-urban text-[10px] uppercase tracking-widest group">
           <RefreshCw size={14} className="group-hover:rotate-180 transition-transform duration-500" /> Sincronizar
         </button>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {cards.map((card, i) => (
           <motion.div key={card.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-            className="bg-white/[0.02] border border-white/5 p-8 rounded-[32px] hover:border-white/10 transition-all group relative overflow-hidden">
+            className="bg-white/[0.02] border border-white/5 p-6 sm:p-8 rounded-[32px] hover:border-white/10 transition-all group relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
               <card.icon size={64} />
             </div>
@@ -117,42 +117,42 @@ const Dashboard = () => {
       </div>
 
       {/* Gestión de Pedidos */}
-      <div className="bg-white/[0.02] border border-white/5 rounded-[40px] overflow-hidden">
-        <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+      <div className="bg-white/[0.02] border border-white/5 rounded-[24px] sm:rounded-[40px] overflow-hidden">
+        <div className="p-5 sm:p-10 border-b border-white/5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white/[0.01]">
           <div className="flex items-center gap-4">
             <Package className="text-white/20" size={24} />
-            <h3 className="font-urban text-2xl uppercase tracking-tighter font-bold">Órdenes Recientes</h3>
+            <h3 className="font-urban text-xl sm:text-2xl uppercase tracking-tighter font-bold">Órdenes Recientes</h3>
           </div>
           <div className="flex gap-4">
-             <div className="relative">
+             <div className="relative flex-1 sm:flex-none">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={14} />
-                <input type="text" placeholder="Buscar pedido..." className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs font-urban outline-none focus:border-white/30 transition-all w-64" />
+                <input type="text" placeholder="Buscar pedido..." className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs font-urban outline-none focus:border-white/30 transition-all w-full sm:w-64" />
              </div>
-             <button className="bg-white/5 border border-white/10 p-2.5 rounded-xl text-white/30 hover:text-white transition"><Filter size={14} /></button>
+             <button className="shrink-0 bg-white/5 border border-white/10 p-2.5 rounded-xl text-white/30 hover:text-white transition"><Filter size={14} /></button>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white/[0.01] border-b border-white/5 text-white/20 text-[9px] uppercase tracking-[0.3em] font-urban">
-                <th className="px-10 py-6 font-normal">Referencia</th>
-                <th className="px-10 py-6 font-normal">Comprador</th>
-                <th className="px-10 py-6 font-normal">Estado</th>
-                <th className="px-10 py-6 font-normal">Inversión</th>
-                <th className="px-10 py-6 font-normal">Emailing</th>
-                <th className="px-10 py-6 font-normal text-right">Control</th>
+              <tr className="bg-white/[0.01] border-b border-white/5 text-white/20 text-[9px] uppercase tracking-[0.3em] font-urban whitespace-nowrap">
+                <th className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 font-normal">Referencia</th>
+                <th className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 font-normal">Comprador</th>
+                <th className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 font-normal">Estado</th>
+                <th className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 font-normal">Inversión</th>
+                <th className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 font-normal">Emailing</th>
+                <th className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 font-normal text-right">Control</th>
               </tr>
             </thead>
             <tbody className="text-sm">
               {orders.map((order) => (
                 <tr key={order.id} className="border-b border-white/5 hover:bg-white/[0.01] transition-colors group">
-                  <td className="px-10 py-8 font-urban text-white/40 font-bold">#{order.id}</td>
-                  <td className="px-10 py-8">
+                  <td className="px-4 sm:px-6 lg:px-10 py-5 sm:py-6 lg:py-8 font-urban text-white/40 font-bold whitespace-nowrap">#{order.id}</td>
+                  <td className="px-4 sm:px-6 lg:px-10 py-5 sm:py-6 lg:py-8 whitespace-nowrap">
                     <p className="text-white font-urban text-base">{order.user.name || 'Sin nombre'}</p>
                     <p className="text-white/20 text-[10px] uppercase tracking-widest">{order.user.email}</p>
                   </td>
-                  <td className="px-10 py-8">
+                  <td className="px-4 sm:px-6 lg:px-10 py-5 sm:py-6 lg:py-8 whitespace-nowrap">
                     <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-xl text-[9px] font-urban uppercase tracking-[0.1em] border ${
                       order.status === 'PENDING' ? 'text-amber-400 border-amber-400/20 bg-amber-400/5' :
                       order.status === 'SHIPPED' ? 'text-blue-400 border-blue-400/20 bg-blue-400/5' :
@@ -167,11 +167,11 @@ const Dashboard = () => {
                       {order.status === 'PENDING' ? 'Pendiente' : order.status === 'SHIPPED' ? 'Enviado' : order.status === 'COMPLETED' ? 'Entregado' : 'Cancelado'}
                     </div>
                   </td>
-                  <td className="px-10 py-8 font-urban text-white/80 font-bold text-lg">${order.total.toLocaleString()}</td>
-                  <td className="px-10 py-8">
+                  <td className="px-4 sm:px-6 lg:px-10 py-5 sm:py-6 lg:py-8 font-urban text-white/80 font-bold text-lg whitespace-nowrap">${order.total.toLocaleString()}</td>
+                  <td className="px-4 sm:px-6 lg:px-10 py-5 sm:py-6 lg:py-8 whitespace-nowrap">
                     {order.emailSent ? (
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                        <div className="w-8 h-8 shrink-0 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
                           <Mail size={14} />
                         </div>
                         <div>
@@ -186,7 +186,7 @@ const Dashboard = () => {
                       </div>
                     )}
                   </td>
-                  <td className="px-10 py-8 text-right">
+                  <td className="px-4 sm:px-6 lg:px-10 py-5 sm:py-6 lg:py-8 text-right whitespace-nowrap">
                     <button onClick={() => { setEditingOrder(order); setUpdateData({ status: order.status, trackingNumber: order.trackingNumber || '', sendEmail: true, customMessage: '' }); }}
                       className="bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black px-5 py-2.5 rounded-xl font-urban text-[10px] uppercase tracking-widest transition-all inline-flex items-center gap-2 group">
                       Gestionar <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
