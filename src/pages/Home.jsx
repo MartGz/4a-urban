@@ -178,28 +178,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ══════════ FRANJA DE TEXTO ANIMADA ══════════ */}
-      <div className="border-y border-white/5 bg-black py-3 overflow-hidden">
-        <div className="flex whitespace-nowrap animate-marquee font-urban text-[10px] uppercase tracking-[0.4em] text-white/20 font-bold">
-          {[...Array(8)].map((_, i) => (
-            <span key={i} className="mx-8 inline-flex items-center gap-3">
-              Streetwear Colombiano <span className="w-1 h-1 rounded-full bg-white/20" /> Diseño Propio <span className="w-1 h-1 rounded-full bg-white/20" /> Cartagena <span className="w-1 h-1 rounded-full bg-white/20" /> 4A Urban
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* ══════════ CARRUSEL DE FOTOS ══════════ */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <p className="text-white/30 font-urban text-xs uppercase tracking-[0.4em] mb-2">La Marca en Movimiento</p>
-            <h2 className="font-urban text-5xl">Nuestro Estilo</h2>
-          </div>
-          <GalleryCarousel slug="home" />
-        </div>
-      </section>
-
       {/* ══════════ MINI CATÁLOGO ══════════ */}
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
@@ -250,6 +228,28 @@ const Home = () => {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ══════════ FRANJA DE TEXTO ANIMADA ══════════ */}
+      <div className="border-y border-white/5 bg-black py-3 overflow-hidden">
+        <div className="flex whitespace-nowrap animate-marquee font-urban text-[10px] uppercase tracking-[0.4em] text-white/20 font-bold">
+          {[...Array(8)].map((_, i) => (
+            <span key={i} className="mx-8 inline-flex items-center gap-3">
+              Streetwear Colombiano <span className="w-1 h-1 rounded-full bg-white/20" /> Diseño Propio <span className="w-1 h-1 rounded-full bg-white/20" /> Cartagena <span className="w-1 h-1 rounded-full bg-white/20" /> 4A Urban
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ══════════ CARRUSEL DE FOTOS ══════════ */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <p className="text-white/30 font-urban text-xs uppercase tracking-[0.4em] mb-2">La Marca en Movimiento</p>
+            <h2 className="font-urban text-5xl">Nuestro Estilo</h2>
+          </div>
+          <GalleryCarousel slug="home" />
         </div>
       </section>
 
