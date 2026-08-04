@@ -39,7 +39,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1c1c1e] flex overflow-hidden">
+    <div className="min-h-screen bg-[#080808] flex overflow-hidden">
       
       {/* ══ PANEL IZQUIERDO (VISUAL) ══ */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
@@ -49,7 +49,7 @@ const Login = () => {
           transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
           className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1000')] bg-cover bg-center" 
         />
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#18181b] via-[#18181b]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-black via-black/40 to-transparent" />
         
         {/* Floating Text */}
         <div className="relative z-10 flex flex-col justify-between p-20 w-full h-full">
@@ -153,7 +153,7 @@ const Login = () => {
 
           <div className="relative my-10">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5" /></div>
-            <div className="relative flex justify-center"><span className="bg-[#1c1c1e] px-4 text-white/20 text-[10px] uppercase tracking-widest">o continúa con</span></div>
+            <div className="relative flex justify-center"><span className="bg-[#080808] px-4 text-white/20 text-[10px] uppercase tracking-widest">o continúa con</span></div>
           </div>
 
           <button

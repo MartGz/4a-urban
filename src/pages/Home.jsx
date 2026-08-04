@@ -14,6 +14,8 @@ const Home = () => {
   const [products, setProducts] = useState([])
   const [current, setCurrent] = useState(0)
   const [added, setAdded] = useState(null)
+  const [bgImages, setBgImages] = useState([])
+  const [bgIndex, setBgIndex] = useState(0)
   const addItem = useCartStore((s) => s.addItem)
 
   useEffect(() => {
@@ -21,6 +23,13 @@ const Home = () => {
       .then((r) => r.json())
       .then((data) => Array.isArray(data) ? setProducts(data) : setProducts([]))
       .catch(() => setProducts([]))
+  }, [])
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/carousels/slug/home/images`)
+      .then((r) => r.json())
+      .then((data) => setBgImages(Array.isArray(data) ? data : []))
+      .catch(() => setBgImages([]))
   }, [])
 
   const next = useCallback(() => {
@@ -34,6 +43,12 @@ const Home = () => {
     return () => clearInterval(t)
   }, [products.length, next])
 
+  useEffect(() => {
+    if (bgImages.length < 2) return
+    const t = setInterval(() => setBgIndex((i) => (i + 1) % bgImages.length), 6000)
+    return () => clearInterval(t)
+  }, [bgImages.length])
+
   const handleAdd = (p) => {
     addItem(p)
     setAdded(p.id)
@@ -43,26 +58,46 @@ const Home = () => {
   const featured = products[current] || null
 
   return (
-    <main className="bg-[#1c1c1e] text-white min-h-screen">
+    <main className="bg-[#080808] text-white min-h-screen">
 
       {/* ══════════ HERO / CARRUSEL ══════════ */}
       <section className="relative h-screen flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#18181b] via-[#232326] to-[#18181b]" />
+        {/* Fondo: carrusel grande de imágenes (si hay), si no un degradado */}
+        {bgImages.length > 0 ? (
+          <>
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={bgImages[bgIndex].id}
+                src={`${API_URL}/api/gallery/${bgImages[bgIndex].id}/image`}
+                alt=""
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.2 }}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </AnimatePresence>
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-[#0d0d0d] to-black" />
+        )}
         {/* Grain texture */}
         <div className="absolute inset-0 opacity-5"
           style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")" }}
         />
-        {/* Blobs flotantes animados */}
-        <motion.div
-          animate={{ x: [0, 60, -20, 0], y: [0, -40, 30, 0], scale: [1, 1.15, 0.95, 1] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-32 -left-24 w-[28rem] h-[28rem] rounded-full bg-white/[0.04] blur-[100px] pointer-events-none"
-        />
-        <motion.div
-          animate={{ x: [0, -50, 30, 0], y: [0, 50, -30, 0], scale: [1, 0.9, 1.1, 1] }}
-          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -bottom-40 -right-20 w-[32rem] h-[32rem] rounded-full bg-amber-500/[0.05] blur-[110px] pointer-events-none"
-        />
+
+        {/* Dots del fondo (si hay varias fotos) */}
+        {bgImages.length > 1 && (
+          <div className="absolute top-8 right-8 flex gap-2 z-10">
+            {bgImages.map((img, i) => (
+              <button key={img.id} onClick={() => setBgIndex(i)}
+                className={`h-1 rounded-full transition-all duration-300 ${i === bgIndex ? "bg-white w-8" : "bg-white/20 w-2"}`}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 w-full grid lg:grid-cols-2 gap-12 items-center pt-20">
           {/* Texto Hero */}
@@ -98,7 +133,7 @@ const Home = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 1.04 }}
                     transition={{ duration: 0.5 }}
-                    className="relative aspect-[3/4] max-h-[65vh] bg-[#18181b]/60 border border-white/5 overflow-hidden group flex items-center justify-center"
+                    className="relative aspect-[3/4] max-h-[65vh] bg-black/60 border border-white/5 overflow-hidden group flex items-center justify-center"
                   >
                     <img
                       src={`${API_URL}/api/products/${featured.id}/image`}
@@ -106,7 +141,7 @@ const Home = () => {
                       className="w-full h-full object-cover"
                       onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; e.target.className = 'w-32 h-32 object-contain opacity-10 mx-auto my-auto'; }}
                     />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#18181b]/80 to-transparent p-6">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
                       <p className="font-urban text-xl text-white">{featured.nombre}</p>
                       <p className="text-white/40 font-urban text-sm">${featured.precio?.toLocaleString()}</p>
                     </div>
@@ -129,7 +164,7 @@ const Home = () => {
                 )}
               </>
             ) : (
-              <div className="aspect-[3/4] max-h-[65vh] bg-[#18181b]/30 border border-white/5 flex flex-col items-center justify-center gap-4">
+              <div className="aspect-[3/4] max-h-[65vh] bg-black/30 border border-white/5 flex flex-col items-center justify-center gap-4">
                 <img src="/logo.png" alt="4A Urban" className="w-24 h-24 object-contain opacity-20" />
                 <p className="text-white/20 font-urban text-sm uppercase tracking-widest">Cargando productos...</p>
               </div>
@@ -144,7 +179,7 @@ const Home = () => {
       </section>
 
       {/* ══════════ FRANJA DE TEXTO ANIMADA ══════════ */}
-      <div className="border-y border-white/5 bg-[#18181b] py-3 overflow-hidden">
+      <div className="border-y border-white/5 bg-black py-3 overflow-hidden">
         <div className="flex whitespace-nowrap animate-marquee font-urban text-[10px] uppercase tracking-[0.4em] text-white/20 font-bold">
           {[...Array(8)].map((_, i) => (
             <span key={i} className="mx-8 inline-flex items-center gap-3">
@@ -189,7 +224,7 @@ const Home = () => {
                   transition={{ delay: i * 0.08 }}
                   className="group cursor-pointer"
                 >
-                  <div className="aspect-[3/4] bg-[#18181b]/50 border border-white/5 flex items-center justify-center relative overflow-hidden">
+                  <div className="aspect-[3/4] bg-black/50 border border-white/5 flex items-center justify-center relative overflow-hidden">
                     <img
                       src={`${API_URL}/api/products/${p.id}/image`}
                       alt={p.nombre}
@@ -219,7 +254,7 @@ const Home = () => {
       </section>
 
       {/* ══════════ TRABAJA CON NOSOTROS ══════════ */}
-      <section className="py-24 px-6 bg-[#232326] border-t border-white/5">
+      <section className="py-24 px-6 bg-[#0d0d0d] border-t border-white/5">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <p className="text-white/30 font-urban text-xs uppercase tracking-[0.4em] mb-4">Oportunidades</p>
@@ -251,7 +286,7 @@ const Home = () => {
               <motion.div key={item.title}
                 whileInView={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }}
                 viewport={{ once: true }}
-                className="bg-[#18181b]/40 border border-white/5 p-6 hover:border-white/15 transition">
+                className="bg-black/40 border border-white/5 p-6 hover:border-white/15 transition">
                 <item.icon className="mb-3 text-white/70" size={28} />
                 <h3 className="font-urban text-lg mb-2">{item.title}</h3>
                 <p className="text-white/30 text-sm leading-relaxed">{item.desc}</p>
@@ -262,7 +297,7 @@ const Home = () => {
       </section>
 
       {/* ══════════ FOOTER ══════════ */}
-      <footer className="bg-[#18181b] border-t border-white/5 pt-20 pb-8 px-6">
+      <footer className="bg-black border-t border-white/5 pt-20 pb-8 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="md:col-span-2">

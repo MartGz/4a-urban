@@ -154,10 +154,10 @@ const Chatbox = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.95 }}
             transition={{ duration: 0.22 }}
-            className="w-[340px] h-[520px] bg-[#232326] border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            className="w-[340px] h-[520px] bg-[#0d0d0d] border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5 bg-[#18181b]/60">
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5 bg-black/60">
               <img src="/logo.png" alt="4A" className="w-9 h-9 object-contain" />
               <div className="flex-1">
                 <p className="text-white font-urban text-sm leading-none">4A Urban</p>

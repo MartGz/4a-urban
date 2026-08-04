@@ -31,13 +31,13 @@ const stats = [
 
 const Nosotros = () => {
   return (
-    <main className="bg-[#1c1c1e] text-white min-h-screen font-urban">
+    <main className="bg-[#080808] text-white min-h-screen font-urban">
 
       {/* ══ HERO ══ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Fondo con gradiente animado */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#18181b] via-[#232326] to-[#111]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-[#0d0d0d] to-[#111]" />
           <div className="absolute inset-0 opacity-[0.03]"
             style={{ backgroundImage: "repeating-linear-gradient(0deg, #fff, #fff 1px, transparent 1px, transparent 80px), repeating-linear-gradient(90deg, #fff, #fff 1px, transparent 1px, transparent 80px)" }}
           />
@@ -109,7 +109,7 @@ const Nosotros = () => {
             <div className="absolute top-10 left-10 right-0 bottom-0 border border-white/10 rounded-[40px]" />
             <div className="absolute inset-20 bg-white/[0.02] flex items-center justify-center rounded-[32px] overflow-hidden">
                <img src="/logo.png" alt="4A Urban" className="w-44 h-44 object-contain opacity-10" />
-               <div className="absolute inset-0 bg-gradient-to-t from-[#18181b]/20 to-transparent" />
+               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             </div>
             {/* Texto en esquina */}
             <div className="absolute bottom-8 left-8 flex items-center gap-3">
@@ -136,7 +136,7 @@ const Nosotros = () => {
       </section>
 
       {/* ══ VALORES ══ */}
-      <section className="py-32 px-6 bg-[#232326] border-y border-white/5">
+      <section className="py-32 px-6 bg-[#0d0d0d] border-y border-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>
@@ -224,11 +224,11 @@ const Nosotros = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link to="/catalogo"
-              className="bg-[#18181b] text-white px-12 py-6 rounded-[24px] font-bold text-xs uppercase tracking-[0.4em] hover:bg-[#18181b]/90 transition shadow-2xl flex items-center justify-center gap-3">
+              className="bg-black text-white px-12 py-6 rounded-[24px] font-bold text-xs uppercase tracking-[0.4em] hover:bg-black/90 transition shadow-2xl flex items-center justify-center gap-3">
               Ver Catálogo <ArrowRight size={16} />
             </Link>
             <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer"
-              className="border-2 border-black text-black px-12 py-6 rounded-[24px] font-bold text-xs uppercase tracking-[0.4em] hover:bg-[#18181b] hover:text-white transition flex items-center justify-center gap-3">
+              className="border-2 border-black text-black px-12 py-6 rounded-[24px] font-bold text-xs uppercase tracking-[0.4em] hover:bg-black hover:text-white transition flex items-center justify-center gap-3">
               Contactar <MessageCircle size={16} />
             </a>
           </div>
