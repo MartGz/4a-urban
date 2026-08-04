@@ -8,7 +8,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import https from 'https';
 import multer from 'multer';
 import { PERMISSIONS, PERMISSION_KEYS } from './permissions.js';
@@ -34,17 +34,11 @@ const prisma = new PrismaClient({ adapter });
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Configuración de Nodemailer. Timeouts cortos para que una conexión SMTP
-// colgada (frecuente en hosts como Render) falle rápido en vez de dejar
-// la petición esperando para siempre.
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  tls: { rejectUnauthorized: false },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
+// Envío de correo vía Resend (API por HTTPS). Gmail por SMTP directo no es
+// confiable desde hosts como Render, que bloquean/cuelgan las conexiones
+// salientes por los puertos de SMTP.
+const resend = new Resend(process.env.RESEND_API_KEY);
+const EMAIL_FROM = process.env.EMAIL_FROM || '4A Urban <onboarding@resend.dev>';
 
 // Función para enviar WhatsApp vía UltraMsg
 const sendWhatsApp = (to, message) => {
@@ -83,17 +77,19 @@ const sendWhatsApp = (to, message) => {
 const sendResetCodeEmail = async (email, name, code) => {
   const html = `<div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #eee; padding: 40px; text-align: center;"><h1 style="letter-spacing: 5px;">4A URBAN</h1><p style="color: #666; margin-bottom: 30px;">CÓDIGO DE SEGURIDAD</p><p>Hola <strong>${name || 'Usuario'}</strong>,</p><p>Has solicitado un cambio de contraseña. Usa el siguiente código para verificar tu identidad:</p><div style="background: #f4f4f4; padding: 20px; font-size: 32px; letter-spacing: 10px; font-weight: bold; margin: 30px 0; border-radius: 10px;">${code}</div><p style="color: #999; font-size: 12px;">Este código expirará en 10 minutos.</p></div>`;
   try {
-    await transporter.sendMail({ from: `"4A Urban" <${process.env.SMTP_USER}>`, to: email, subject: `Código de Seguridad: ${code}`, html });
+    const { error } = await resend.emails.send({ from: EMAIL_FROM, to: email, subject: `Código de Seguridad: ${code}`, html });
+    if (error) throw error;
     return true;
-  } catch (e) { console.error('Error SMTP:', e.message); return false; }
+  } catch (e) { console.error('Error Resend:', e.message || e); return false; }
 }
 
 const sendInviteEmail = async (email, name, link) => {
   const html = `<div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #eee; padding: 40px; text-align: center;"><h1 style="letter-spacing: 5px;">4A URBAN</h1><p style="color: #666; margin-bottom: 30px;">INVITACIÓN AL EQUIPO</p><p>Hola <strong>${name || 'Usuario'}</strong>,</p><p>Te invitaron a formar parte del equipo de 4A Urban. Crea tu contraseña para activar tu cuenta:</p><a href="${link}" style="display:inline-block;background:#111;color:#fff;padding:16px 32px;margin:20px 0;border-radius:10px;text-decoration:none;font-weight:bold;">Crear mi contraseña</a><p style="color: #999; font-size: 12px;">Este enlace expira en 48 horas. Si tú no esperabas este correo, ignóralo.</p></div>`;
   try {
-    await transporter.sendMail({ from: `"4A Urban" <${process.env.SMTP_USER}>`, to: email, subject: 'Invitación a 4A Urban', html });
+    const { error } = await resend.emails.send({ from: EMAIL_FROM, to: email, subject: 'Invitación a 4A Urban', html });
+    if (error) throw error;
     return true;
-  } catch (e) { console.error('Error SMTP:', e.message); return false; }
+  } catch (e) { console.error('Error Resend:', e.message || e); return false; }
 };
 
 app.use(cors({ origin: FRONTEND_URL }));
