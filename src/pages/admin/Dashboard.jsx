@@ -202,45 +202,45 @@ const Dashboard = () => {
       {/* ══ MODAL DE GESTIÓN (REDESIGNADO) ══ */}
       <AnimatePresence>
         {editingOrder && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingOrder(null)} className="absolute inset-0 bg-black/95 backdrop-blur-xl" />
-            
+
             <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="relative w-full max-w-xl bg-[#0e0e0e] border border-white/10 rounded-[48px] overflow-hidden p-12 shadow-2xl"
+              className="relative w-full max-w-xl max-h-[92vh] overflow-y-auto bg-[#0e0e0e] border border-white/10 rounded-[28px] sm:rounded-[48px] p-6 sm:p-12 shadow-2xl"
             >
-              <div className="flex justify-between items-start mb-12">
-                <div>
-                  <h2 className="font-urban text-5xl text-white mb-3 uppercase tracking-tighter font-bold">ORDEN #{editingOrder.id}</h2>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/5 rounded-full flex items-center justify-center"><User size={12} className="text-white/30" /></div>
-                    <p className="text-white/30 text-[10px] font-urban uppercase tracking-[0.2em]">{editingOrder.user.email}</p>
+              <div className="flex justify-between items-start gap-4 mb-8 sm:mb-12">
+                <div className="min-w-0">
+                  <h2 className="font-urban text-3xl sm:text-5xl text-white mb-3 uppercase tracking-tighter font-bold break-words">ORDEN #{editingOrder.id}</h2>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 shrink-0 bg-white/5 rounded-full flex items-center justify-center"><User size={12} className="text-white/30" /></div>
+                    <p className="text-white/30 text-[10px] font-urban uppercase tracking-[0.2em] truncate">{editingOrder.user.email}</p>
                   </div>
                 </div>
-                <button onClick={() => setEditingOrder(null)} className="p-3 bg-white/5 hover:bg-white/10 rounded-full text-white/20 hover:text-white transition"><XCircle size={24} /></button>
+                <button onClick={() => setEditingOrder(null)} className="p-3 shrink-0 bg-white/5 hover:bg-white/10 rounded-full text-white/20 hover:text-white transition"><XCircle size={24} /></button>
               </div>
 
-              <form onSubmit={handleUpdateOrder} className="space-y-10">
+              <form onSubmit={handleUpdateOrder} className="space-y-8 sm:space-y-10">
                 {/* Selector de Estado Premium */}
                 <div>
                   <label className="flex items-center gap-2 text-white/20 text-[9px] uppercase tracking-[0.3em] font-urban mb-5">
                     <Activity size={12} /> Estado del Proceso
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {statusOptions.map((opt) => {
                       const Icon = opt.icon;
                       return (
                         <button key={opt.id} type="button" onClick={() => setUpdateData({ ...updateData, status: opt.id })}
-                          className={`flex items-center justify-between p-4 rounded-2xl border font-urban text-[11px] uppercase tracking-widest transition-all ${
-                            updateData.status === opt.id 
-                              ? `border-white text-white ${opt.color}/10 bg-white/5` 
+                          className={`flex items-center justify-between p-3 sm:p-4 rounded-2xl border font-urban text-[10px] sm:text-[11px] uppercase tracking-widest transition-all ${
+                            updateData.status === opt.id
+                              ? `border-white text-white ${opt.color}/10 bg-white/5`
                               : 'border-white/5 text-white/20 hover:border-white/20 hover:bg-white/[0.02]'
                           }`}
                         >
-                          <span className="flex items-center gap-3">
-                             <Icon size={16} className={updateData.status === opt.id ? 'text-white' : 'text-white/10'} />
-                             {opt.label}
+                          <span className="flex items-center gap-3 truncate">
+                             <Icon size={16} className={`shrink-0 ${updateData.status === opt.id ? 'text-white' : 'text-white/10'}`} />
+                             <span className="truncate">{opt.label}</span>
                           </span>
-                          {updateData.status === opt.id && <CheckCircle2 size={14} className="text-white" />}
+                          {updateData.status === opt.id && <CheckCircle2 size={14} className="shrink-0 text-white ml-2" />}
                         </button>
                       )
                     })}
@@ -255,29 +255,29 @@ const Dashboard = () => {
                   <div className="relative">
                     <input type="text" value={updateData.trackingNumber} onChange={(e) => setUpdateData({ ...updateData, trackingNumber: e.target.value })}
                       placeholder="Ej: SERVIENTREGA-99201"
-                      className="w-full bg-white/5 border border-white/10 text-white pl-14 pr-6 py-5 rounded-2xl focus:border-white/30 outline-none text-sm font-urban tracking-widest placeholder:text-white/5"
+                      className="w-full bg-white/5 border border-white/10 text-white pl-12 sm:pl-14 pr-4 sm:pr-6 py-4 sm:py-5 rounded-2xl focus:border-white/30 outline-none text-sm font-urban tracking-widest placeholder:text-white/5"
                     />
-                    <Package size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-white/10" />
+                    <Package size={18} className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-white/10" />
                   </div>
                 </div>
 
                 {/* Sección Email Dinámica */}
-                <div className="space-y-6 bg-white/[0.02] border border-white/5 p-6 rounded-3xl">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${updateData.sendEmail ? 'bg-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10' : 'bg-white/5 text-white/10'}`}>
+                <div className="space-y-6 bg-white/[0.02] border border-white/5 p-4 sm:p-6 rounded-3xl">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-2xl flex items-center justify-center transition-all ${updateData.sendEmail ? 'bg-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10' : 'bg-white/5 text-white/10'}`}>
                         <Bell size={20} />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-white font-urban text-xs uppercase tracking-widest font-bold">Email Automatizado</p>
-                        <p className="text-white/20 text-[9px] uppercase tracking-widest">Enviar alerta al comprador</p>
+                        <p className="text-white/20 text-[9px] uppercase tracking-widest truncate">Enviar alerta al comprador</p>
                       </div>
                     </div>
                     <button type="button" onClick={() => setUpdateData({ ...updateData, sendEmail: !updateData.sendEmail })}
-                      className={`w-14 h-7 rounded-full p-1 transition-all flex items-center ${updateData.sendEmail ? 'bg-emerald-500' : 'bg-white/10'}`}>
-                      <motion.div 
+                      className={`w-14 h-7 shrink-0 rounded-full p-1 transition-all flex items-center ${updateData.sendEmail ? 'bg-emerald-500' : 'bg-white/10'}`}>
+                      <motion.div
                         animate={{ x: updateData.sendEmail ? 28 : 0 }}
-                        className="w-5 h-5 bg-white rounded-full shadow-md" 
+                        className="w-5 h-5 bg-white rounded-full shadow-md"
                       />
                     </button>
                   </div>
@@ -290,7 +290,7 @@ const Dashboard = () => {
                         </label>
                         <textarea value={updateData.customMessage} onChange={(e) => setUpdateData({ ...updateData, customMessage: e.target.value })}
                           placeholder="Tu pedido ya está en camino, esperamos que te encante..."
-                          className="w-full bg-white/5 border border-white/10 text-white px-6 py-4 rounded-2xl focus:border-white/30 outline-none text-sm min-h-[120px] font-urban placeholder:text-white/5"
+                          className="w-full bg-white/5 border border-white/10 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl focus:border-white/30 outline-none text-sm min-h-[100px] sm:min-h-[120px] font-urban placeholder:text-white/5"
                         />
                       </motion.div>
                     )}
@@ -298,8 +298,8 @@ const Dashboard = () => {
                 </div>
 
                 {/* Acciones Finales */}
-                <div className="flex gap-4 pt-4">
-                  <button type="submit" disabled={saving} className="flex-1 bg-white text-black py-6 rounded-[24px] font-urban text-xs uppercase tracking-[0.4em] font-bold hover:bg-gray-100 transition shadow-2xl shadow-white/5 disabled:opacity-50 disabled:cursor-not-allowed">
+                <div className="flex gap-4 pt-2 sm:pt-4">
+                  <button type="submit" disabled={saving} className="flex-1 bg-white text-black py-4 sm:py-6 rounded-[24px] font-urban text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] font-bold hover:bg-gray-100 transition shadow-2xl shadow-white/5 disabled:opacity-50 disabled:cursor-not-allowed">
                     {saving ? 'Procesando...' : 'Actualizar Orden'}
                   </button>
                 </div>

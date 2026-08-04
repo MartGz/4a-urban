@@ -8,25 +8,55 @@ const WHATSAPP_NUMBER = "573337071742"
 
 // ── Bot responses ──────────────────────────────────────────────────────────────
 const FAQS = {
-  hola: "¡Hola! Soy el asistente de **4A Urban**. Puedo ayudarte con preguntas sobre productos, envíos y pagos.\n\n¿En qué te puedo ayudar hoy?",
-  precio: "Nuestros productos van desde **$80.000 hasta $90.000 COP**. Puedes ver el catálogo completo en la sección Catálogo.",
-  talla: "Manejamos tallas **S, M, L y XL** en todos nuestros productos.",
-  envio: "Los envíos se coordinan por **WhatsApp**. ¡Hacemos envíos a todo Colombia!",
-  pago: "Aceptamos **efectivo, transferencia y Nequi**. Todo se coordina por WhatsApp.",
-  pedido: "Agrega productos al carrito y al finalizar se abrirá WhatsApp automáticamente con tu pedido.",
-  proveedor: "¿Te interesa ser proveedor? Contáctanos por WhatsApp o visita la sección **Trabaja con nosotros** en la página de inicio.",
-  default: "No entendí bien tu pregunta. Puedes preguntar sobre **precios**, **tallas**, **envíos**, **pagos** o escribirnos por WhatsApp.",
+  saludo: "¡Hola! Soy el asistente de **4A Urban**. Puedo ayudarte con precios, tallas, envíos, pagos, cambios y más.\n\n¿En qué te puedo ayudar hoy?",
+  despedida: "¡Gracias por escribirnos! Si necesitas algo más, aquí estaré. También puedes escribirnos por WhatsApp cuando quieras 👇",
+  precio: "Nuestros productos van desde **$80.000 hasta $90.000 COP**. Puedes ver el catálogo completo con precios exactos en la sección **Catálogo**.",
+  talla: "Manejamos tallas **S, M, L y XL** en todos nuestros productos. Si tienes dudas sobre cuál te queda mejor, escríbenos por WhatsApp y te ayudamos a elegir.",
+  envio: "Los envíos se coordinan por **WhatsApp** y hacemos entregas a **todo Colombia**. El tiempo de entrega depende de tu ciudad, normalmente entre 1 y 4 días hábiles.",
+  pago: "Aceptamos **efectivo, transferencia y Nequi**. Todo se coordina y confirma por WhatsApp una vez armas tu pedido.",
+  pedido: "Agrega los productos que quieras al carrito y al finalizar se abrirá **WhatsApp automáticamente** con el resumen de tu pedido para confirmarlo con nosotros.",
+  seguimiento: "Para el estado de un pedido ya realizado, escríbenos por **WhatsApp** con tu nombre o número de pedido y te contamos en qué va.",
+  cambios: "Manejamos cambios por talla o defectos de fábrica dentro de los primeros días después de recibido el pedido. Escríbenos por **WhatsApp** contándonos el caso y lo resolvemos.",
+  materiales: "Trabajamos con telas de **buena calidad** pensadas para uso diario streetwear. Si quieres el detalle del material de una prenda específica, revisa su ficha en el **Catálogo** o pregúntanos por WhatsApp.",
+  catalogo: "Puedes ver todos nuestros productos disponibles en la sección **Catálogo**, con fotos, precios y tallas.",
+  proveedor: "¿Te interesa ser proveedor o aliado? Contáctanos por **WhatsApp** o visita la sección **Trabaja con nosotros** en la página de inicio.",
+  contacto: "Puedes escribirnos directamente por **WhatsApp**, es nuestro canal principal de atención y ahí resolvemos cualquier duda o pedido.",
+  horario: "Respondemos por WhatsApp en horario habitual de tienda. Si escribes fuera de horario, te respondemos apenas estemos disponibles.",
+  descuento: "Los descuentos y promociones los anunciamos por nuestras redes y WhatsApp. ¡Escríbenos y te contamos si hay alguna activa!",
+  default: "No entendí bien tu pregunta 🤔 Puedo ayudarte con: **precios**, **tallas**, **envíos**, **pagos**, **cambios/devoluciones**, **seguimiento de pedidos** o **ser proveedor**.\n\nTambién puedes escribirnos directo por WhatsApp.",
 }
 
+// Reglas ordenadas: la primera que haga match gana. Se evalúan sobre texto
+// normalizado (minúsculas, sin tildes) para cubrir variaciones de escritura.
+const RULES = [
+  [/\b(gracias|chao|adios|nos vemos|hasta luego|bye)\b/, "despedida"],
+  [/\b(hola|holi|buenas|buenos dias|buenas tardes|buenas noches|hey|saludos|que tal)\b/, "saludo"],
+  [/\b(precio|precios|cuesta|cuestan|vale|valen|valor|cuanto cuesta|cuanto vale|tarifa)\b/, "precio"],
+  [/\b(talla|tallas|medida|medidas|tamano|tamanos|guia de tallas)\b/, "talla"],
+  [/\b(envio|envios|domicilio|domicilios|entrega|entregan|manda|mandan|cuanto tarda|tiempo de entrega|a donde envian|hacen envios)\b/, "envio"],
+  [/\b(pago|pagar|nequi|transferencia|transfer|efectivo|tarjeta|metodos de pago|como pago)\b/, "pago"],
+  [/\b(seguimiento|rastrear|donde esta mi pedido|estado de mi pedido|estado del pedido)\b/, "seguimiento"],
+  [/\b(cambio|cambios|devolucion|devoluciones|garantia|defecto|no me quedo|no me sirvio|talla equivocada)\b/, "cambios"],
+  [/\b(material|materiales|tela|telas|calidad|algodon|composicion)\b/, "materiales"],
+  [/\b(catalogo|productos|que venden|que tienen|coleccion|colecciones|que hay disponible)\b/, "catalogo"],
+  [/\b(proveedor|proveedores|vendedor|distribuidor|distribuidores|aliado|aliados|mayorista|mayoristas)\b/, "proveedor"],
+  [/\b(pedido|pedidos|compra|comprar|pedir|order|como compro|como hago un pedido)\b/, "pedido"],
+  [/\b(contacto|telefono|numero|hablar con alguien|atencion al cliente|whatsapp)\b/, "contacto"],
+  [/\b(horario|horarios|hora de atencion|a que hora|abren|cierran)\b/, "horario"],
+  [/\b(descuento|descuentos|promocion|promociones|oferta|ofertas|cupon|rebaja)\b/, "descuento"],
+]
+
+const normalize = (text) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+
 const getPublicResponse = (msg) => {
-  const m = msg.toLowerCase()
-  if (m.match(/hola|buenos|hey|saludos/)) return FAQS.hola
-  if (m.match(/precio|cuesta|vale|valor|cuanto/)) return FAQS.precio
-  if (m.match(/talla|taille|medida|tama/)) return FAQS.talla
-  if (m.match(/envio|envío|domicilio|entrega|manda/)) return FAQS.envio
-  if (m.match(/pago|pagar|nequi|transfer|efectivo/)) return FAQS.pago
-  if (m.match(/pedido|compra|pedir|order/)) return FAQS.pedido
-  if (m.match(/proveedor|vendedor|distribuidor|aliado/)) return FAQS.proveedor
+  const m = normalize(msg)
+  for (const [pattern, key] of RULES) {
+    if (pattern.test(m)) return FAQS[key]
+  }
   return FAQS.default
 }
 
