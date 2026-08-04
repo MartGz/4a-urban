@@ -93,7 +93,7 @@ const sendWhatsApp = (to, message) => {
 };
 
 const sendResetCodeEmail = (email, name, code) => {
-  const html = `<div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #eee; padding: 40px; text-align: center;"><h1 style="letter-spacing: 5px;">4A URBAN</h1><p style="color: #666; margin-bottom: 30px;">CÓDIGO DE SEGURIDAD</p><p>Hola <strong>${name || 'Usuario'}</strong>,</p><p>Has solicitado un cambio de contraseña. Usa el siguiente código para verificar tu identidad:</p><div style="background: #f4f4f4; padding: 20px; font-size: 32px; letter-spacing: 10px; font-weight: bold; margin: 30px 0; border-radius: 10px;">${code}</div><p style="color: #999; font-size: 12px;">Este código expirará en 10 minutos.</p></div>`;
+  const html = `<div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #eee; padding: 40px; text-align: center;"><h1 style="letter-spacing: 5px;">4A URBAN</h1><p style="color: #666; margin-bottom: 30px;">CÓDIGO DE SEGURIDAD</p><p>Hola <strong>${name || 'Usuario'}</strong>,</p><p>Has solicitado un cambio de contraseña. Usa el siguiente código para verificar tu identidad:</p><div style="background: #f4f4f4; padding: 20px; font-size: 32px; letter-spacing: 10px; font-weight: bold; margin: 30px 0; border-radius: 10px;">${code}</div><p style="color: #999; font-size: 12px;">Este código expirará en 30 minutos.</p></div>`;
   return sendEmail(email, `Código de Seguridad: ${code}`, html);
 }
 
@@ -115,6 +115,7 @@ const authLimiter = rateLimit({
 });
 
 const generateResetCode = () => randomInt(100000, 1000000).toString();
+const RESET_CODE_TTL_MS = 30 * 60 * 1000;
 
 let cachedCustomerRoleId = null;
 const getCustomerRoleId = async () => {
@@ -200,7 +201,7 @@ app.post('/api/auth/accept-invite', authLimiter, async (req, res) => {
 app.post('/api/auth/request-reset', authLimiter, authenticateToken, async (req, res) => {
   const { method } = req.body;
   const code = generateResetCode();
-  const expires = new Date(Date.now() + 10 * 60 * 1000);
+  const expires = new Date(Date.now() + RESET_CODE_TTL_MS);
   try {
     const user = await prisma.user.update({ where: { id: req.user.id }, data: { resetCode: code, resetCodeExpires: expires } });
     if (method === 'EMAIL') {
@@ -232,7 +233,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
     // Respuesta genérica siempre, para no revelar si el correo existe o no.
     if (user && user.password) {
       const code = generateResetCode();
-      const expires = new Date(Date.now() + 10 * 60 * 1000);
+      const expires = new Date(Date.now() + RESET_CODE_TTL_MS);
       await prisma.user.update({ where: { id: user.id }, data: { resetCode: code, resetCodeExpires: expires } });
       if (method === 'WHATSAPP' && user.phone) {
         sendWhatsApp(user.phone, `Hola ${user.name || 'Usuario'}, tu código de seguridad para 4A Urban es: ${code}`);
