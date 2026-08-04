@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react"
 import { API_URL } from "../lib/api"
 
-const GalleryCarousel = () => {
+const GalleryCarousel = ({ slug }) => {
   const [images, setImages] = useState([])
 
   useEffect(() => {
-    fetch(`${API_URL}/api/gallery`)
+    fetch(`${API_URL}/api/carousels/slug/${slug}/images`)
       .then((r) => r.json())
       .then((d) => setImages(Array.isArray(d) ? d : []))
       .catch(() => setImages([]))
-  }, [])
+  }, [slug])
 
   if (images.length === 0) return null
 

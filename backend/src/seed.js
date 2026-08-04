@@ -74,6 +74,13 @@ async function main() {
     console.log('Ya existen productos en la base de datos.');
   }
 
+  // Carrusel por defecto usado en la página Nosotros
+  await prisma.carousel.upsert({
+    where: { slug: 'nosotros' },
+    update: {},
+    create: { slug: 'nosotros', name: 'Nosotros (Síguenos)' },
+  });
+
   console.log('Seed completado.');
 }
 

@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Trash2, ArrowUp, ArrowDown, ImageIcon } from 'lucide-react';
+import { Upload, Trash2, ArrowUp, ArrowDown, ImageIcon, ArrowLeft } from 'lucide-react';
 import { API_URL } from '../../lib/api';
 
 const GalleryManager = () => {
+  const { carouselId } = useParams();
+  const [carousel, setCarousel] = useState(null);
   const [images, setImages] = useState([]);
   const [caption, setCaption] = useState('');
   const [file, setFile] = useState(null);
@@ -14,11 +17,14 @@ const GalleryManager = () => {
   const fileInputRef = useRef(null);
   const { token } = useAuthStore();
 
-  useEffect(() => { fetchImages(); }, []);
+  useEffect(() => { fetchCarousel(); }, [carouselId]);
 
-  const fetchImages = async () => {
-    const res = await fetch(`${API_URL}/api/gallery`);
-    setImages(await res.json());
+  const fetchCarousel = async () => {
+    const res = await fetch(`${API_URL}/api/carousels/${carouselId}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return;
+    const data = await res.json();
+    setCarousel(data);
+    setImages(data.images);
   };
 
   const handleFileChange = (e) => {
@@ -36,7 +42,7 @@ const GalleryManager = () => {
       const formData = new FormData();
       formData.append('image', file);
       formData.append('caption', caption);
-      const res = await fetch(`${API_URL}/api/gallery`, {
+      const res = await fetch(`${API_URL}/api/carousels/${carouselId}/images`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -46,7 +52,7 @@ const GalleryManager = () => {
         setCaption('');
         setPreview(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
-        fetchImages();
+        fetchCarousel();
       } else {
         const err = await res.json();
         setError(err.error || 'No se pudo subir la imagen');
@@ -59,9 +65,9 @@ const GalleryManager = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('¿Eliminar esta foto de la galería?')) return;
+    if (!confirm('¿Eliminar esta foto del carrusel?')) return;
     await fetch(`${API_URL}/api/gallery/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-    fetchImages();
+    fetchCarousel();
   };
 
   const move = async (index, direction) => {
@@ -80,15 +86,21 @@ const GalleryManager = () => {
         body: JSON.stringify({ position: current.position }),
       }),
     ]);
-    fetchImages();
+    fetchCarousel();
   };
+
+  if (!carousel) return null;
 
   return (
     <div>
+      <Link to="/admin/galeria" className="inline-flex items-center gap-2 text-white/30 hover:text-white transition text-xs uppercase tracking-widest mb-6">
+        <ArrowLeft size={12} /> Todos los carruseles
+      </Link>
+
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-urban text-4xl">Galería</h1>
-          <p className="text-white/30 text-sm mt-1">{images.length} foto(s) en el carrusel público</p>
+          <h1 className="font-urban text-4xl">{carousel.name}</h1>
+          <p className="text-white/30 text-sm mt-1">{images.length} foto(s) &middot; slug: {carousel.slug}</p>
         </div>
       </div>
 
@@ -133,7 +145,7 @@ const GalleryManager = () => {
             <motion.div key={img.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="bg-white/3 border border-white/8 rounded-2xl overflow-hidden group relative">
               <div className="aspect-square bg-black/40">
-                <img src={`${API_URL}/api/gallery/${img.id}/image`} alt={img.caption || 'Galería'} className="w-full h-full object-cover" />
+                <img src={`${API_URL}/api/gallery/${img.id}/image`} alt={img.caption || carousel.name} className="w-full h-full object-cover" />
               </div>
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2">
                 <div className="flex gap-2">
@@ -161,7 +173,7 @@ const GalleryManager = () => {
 
       {images.length === 0 && (
         <div className="text-center py-24">
-          <p className="text-white/20 font-urban text-xl">Aún no hay fotos en la galería</p>
+          <p className="text-white/20 font-urban text-xl">Aún no hay fotos en este carrusel</p>
         </div>
       )}
     </div>

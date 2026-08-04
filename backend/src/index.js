@@ -388,9 +388,63 @@ app.delete('/api/staff/:id', authenticateToken, requirePermission('staff.manage'
   } catch (err) { console.error(err); res.status(500).json({ error: 'Error eliminando el usuario' }); }
 });
 
-// ── Galería ──────────────────────────────────────────────────────────────────
-app.get('/api/gallery', async (req, res) => {
+// ── Carruseles ───────────────────────────────────────────────────────────────
+app.get('/api/carousels', authenticateToken, requirePermission('gallery.manage'), async (req, res) => {
+  const carousels = await prisma.carousel.findMany({
+    include: { _count: { select: { images: true } } },
+    orderBy: { createdAt: 'asc' },
+  });
+  res.json(carousels);
+});
+
+app.get('/api/carousels/:id', authenticateToken, requirePermission('gallery.manage'), async (req, res) => {
+  const carousel = await prisma.carousel.findUnique({
+    where: { id: Number(req.params.id) },
+    include: { images: { select: { id: true, caption: true, position: true, createdAt: true }, orderBy: [{ position: 'asc' }, { createdAt: 'asc' }] } },
+  });
+  if (!carousel) return res.sendStatus(404);
+  res.json(carousel);
+});
+
+const isValidSlug = (slug) => typeof slug === 'string' && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug);
+
+app.post('/api/carousels', authenticateToken, requirePermission('gallery.manage'), async (req, res) => {
+  const { name, slug } = req.body;
+  if (!name || !isValidSlug(slug)) return res.status(400).json({ error: 'Nombre y slug (minúsculas, sin espacios, ej: "home-hero") son requeridos' });
+  try {
+    const carousel = await prisma.carousel.create({ data: { name, slug } });
+    res.status(201).json(carousel);
+  } catch (err) {
+    if (err.code === 'P2002') return res.status(400).json({ error: 'Ya existe un carrusel con ese slug' });
+    console.error(err); res.status(500).json({ error: 'Error' });
+  }
+});
+
+app.put('/api/carousels/:id', authenticateToken, requirePermission('gallery.manage'), async (req, res) => {
+  const { name, slug } = req.body;
+  if (!name || !isValidSlug(slug)) return res.status(400).json({ error: 'Nombre y slug (minúsculas, sin espacios, ej: "home-hero") son requeridos' });
+  try {
+    const updated = await prisma.carousel.update({ where: { id: Number(req.params.id) }, data: { name, slug } });
+    res.json(updated);
+  } catch (err) {
+    if (err.code === 'P2002') return res.status(400).json({ error: 'Ya existe un carrusel con ese slug' });
+    console.error(err); res.status(500).json({ error: 'Error' });
+  }
+});
+
+app.delete('/api/carousels/:id', authenticateToken, requirePermission('gallery.manage'), async (req, res) => {
+  try {
+    await prisma.carousel.delete({ where: { id: Number(req.params.id) } });
+    res.status(204).send();
+  } catch { res.sendStatus(404); }
+});
+
+// ── Imágenes de galería (dentro de un carrusel) ─────────────────────────────
+app.get('/api/carousels/slug/:slug/images', async (req, res) => {
+  const carousel = await prisma.carousel.findUnique({ where: { slug: req.params.slug } });
+  if (!carousel) return res.json([]);
   const images = await prisma.galleryImage.findMany({
+    where: { carouselId: carousel.id },
     select: { id: true, caption: true, position: true, createdAt: true },
     orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
   });
@@ -405,13 +459,17 @@ app.get('/api/gallery/:id/image', async (req, res) => {
   res.send(Buffer.from(image.data));
 });
 
-app.post('/api/gallery', authenticateToken, requirePermission('gallery.manage'), upload.single('image'), async (req, res) => {
+app.post('/api/carousels/:id/images', authenticateToken, requirePermission('gallery.manage'), upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'La imagen es requerida' });
   try {
+    const carouselId = Number(req.params.id);
+    const carousel = await prisma.carousel.findUnique({ where: { id: carouselId } });
+    if (!carousel) return res.sendStatus(404);
     const { caption } = req.body;
-    const maxPosition = await prisma.galleryImage.aggregate({ _max: { position: true } });
+    const maxPosition = await prisma.galleryImage.aggregate({ where: { carouselId }, _max: { position: true } });
     const image = await prisma.galleryImage.create({
       data: {
+        carouselId,
         data: req.file.buffer,
         mimeType: req.file.mimetype,
         caption: caption || null,

@@ -51,13 +51,24 @@ model User {
   orders    Order[]
 }
 
+model Carousel {
+  id        Int            @id @default(autoincrement())
+  slug      String         @unique
+  name      String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  images    GalleryImage[]
+}
+
 model GalleryImage {
-  id        Int      @id @default(autoincrement())
-  data      Bytes
-  mimeType  String
-  caption   String?
-  position  Int      @default(0)
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  carouselId Int
+  carousel   Carousel @relation(fields: [carouselId], references: [id], onDelete: Cascade)
+  data       Bytes
+  mimeType   String
+  caption    String?
+  position   Int      @default(0)
+  createdAt  DateTime @default(now())
 }
 
 model Order {

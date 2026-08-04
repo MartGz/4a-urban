@@ -193,7 +193,7 @@ const Nosotros = () => {
         </div>
 
         <div className="mt-24">
-          <GalleryCarousel />
+          <GalleryCarousel slug="nosotros" />
         </div>
       </section>
 
