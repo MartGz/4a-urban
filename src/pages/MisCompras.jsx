@@ -46,7 +46,7 @@ const MisCompras = () => {
   }
 
   return (
-    <main className="min-h-screen bg-[#080808] text-white pt-44 px-6 pb-32 overflow-hidden relative">
+    <main className="min-h-screen bg-[#1c1c1e] text-white pt-44 px-6 pb-32 overflow-hidden relative">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-white/[0.01] blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2" />
       
@@ -144,7 +144,7 @@ const MisCompras = () => {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="border-t border-white/5 bg-black/20"
+                        className="border-t border-white/5 bg-[#18181b]/20"
                       >
                         <div className="p-10 space-y-10">
                           {/* Info Especial */}
@@ -173,12 +173,13 @@ const MisCompras = () => {
                             <div className="grid gap-4">
                               {order.items.map((item) => (
                                 <div key={item.id} className="flex items-center gap-6 bg-white/[0.02] p-5 rounded-[24px] border border-white/5 hover:border-white/10 transition-colors group">
-                                  <div className="w-16 h-20 bg-black border border-white/5 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
-                                    {item.product.imageUrl ? (
-                                      <img src={item.product.imageUrl} alt={item.product.nombre} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                    ) : (
-                                      <img src="/logo.png" alt="4A" className="w-8 h-8 object-contain opacity-10" />
-                                    )}
+                                  <div className="w-16 h-20 bg-[#18181b] border border-white/5 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+                                    <img
+                                      src={`${API_URL}/api/products/${item.product.id}/image`}
+                                      alt={item.product.nombre}
+                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                      onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; e.target.className = 'w-8 h-8 object-contain opacity-10'; }}
+                                    />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-white font-urban text-lg font-bold uppercase tracking-tight">{item.product.nombre}</p>

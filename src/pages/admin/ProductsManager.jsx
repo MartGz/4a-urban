@@ -1,14 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ImageIcon } from 'lucide-react';
 import { API_URL } from '../../lib/api';
+
+const emptyForm = { nombre: '', precio: '', talla: '' };
 
 const ProductsManager = () => {
   const [products, setProducts] = useState([]);
-  const [formData, setFormData] = useState({ nombre: '', precio: '', talla: '', imageUrl: '' });
+  const [formData, setFormData] = useState(emptyForm);
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
   const { token } = useAuthStore();
 
   useEffect(() => { fetchProducts(); }, []);
@@ -19,31 +26,59 @@ const ProductsManager = () => {
     setProducts(data);
   };
 
+  const resetForm = () => {
+    setFormData(emptyForm);
+    setImageFile(null);
+    setPreview(null);
+    setEditingId(null);
+    setError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleFileChange = (e) => {
+    const f = e.target.files[0];
+    setImageFile(f || null);
+    setPreview(f ? URL.createObjectURL(f) : null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     const url = editingId ? `${API_URL}/api/products/${editingId}` : `${API_URL}/api/products`;
     const method = editingId ? 'PUT' : 'POST';
     try {
+      const body = new FormData();
+      body.append('nombre', formData.nombre);
+      body.append('precio', formData.precio);
+      body.append('talla', formData.talla);
+      if (imageFile) body.append('image', imageFile);
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(formData),
+        headers: { Authorization: `Bearer ${token}` },
+        body,
       });
       if (res.ok) {
-        setFormData({ nombre: '', precio: '', talla: '', imageUrl: '' });
-        setEditingId(null);
+        resetForm();
         setShowForm(false);
         fetchProducts();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setError(err.error || 'No se pudo guardar el producto');
       }
+    } catch {
+      setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
     }
   };
 
   const handleEdit = (p) => {
-    setFormData({ nombre: p.nombre, precio: p.precio, talla: p.talla, imageUrl: p.imageUrl || '' });
+    setFormData({ nombre: p.nombre, precio: p.precio, talla: p.talla });
+    setImageFile(null);
+    setPreview(`${API_URL}/api/products/${p.id}/image`);
     setEditingId(p.id);
+    setError('');
     setShowForm(true);
   };
 
@@ -64,7 +99,7 @@ const ProductsManager = () => {
           <p className="text-white/30 text-sm mt-1">{products.length} productos en catálogo</p>
         </div>
         <button
-          onClick={() => { setShowForm(!showForm); setEditingId(null); setFormData({ nombre: '', precio: '', talla: '', imageUrl: '' }); }}
+          onClick={() => { const next = !showForm; setShowForm(next); resetForm(); }}
           className="bg-white text-black px-6 py-3 font-urban text-sm uppercase tracking-widest hover:bg-gray-100 transition rounded-xl"
         >
           + Nuevo Producto
@@ -81,34 +116,49 @@ const ProductsManager = () => {
             className="bg-white/3 border border-white/10 rounded-2xl p-6 mb-8"
           >
             <h2 className="font-urban text-xl mb-6 text-white/80">{editingId ? 'Editar Producto' : 'Nuevo Producto'}</h2>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { key: 'nombre', label: 'Nombre del producto', type: 'text', placeholder: 'Ej: Camiseta 4A Classic' },
-                { key: 'precio', label: 'Precio (COP)', type: 'number', placeholder: 'Ej: 80000' },
-                { key: 'talla', label: 'Tallas disponibles', type: 'text', placeholder: 'Ej: S/M/L/XL' },
-                { key: 'imageUrl', label: 'URL imagen (Opcional)', type: 'text', placeholder: 'https://...' },
-              ].map(field => (
-                <div key={field.key}>
-                  <label className="block text-white/40 text-xs uppercase tracking-widest mb-2 font-urban">{field.label}</label>
-                  <input
-                    type={field.type}
-                    placeholder={field.placeholder}
-                    value={formData[field.key]}
-                    onChange={e => setFormData({ ...formData, [field.key]: e.target.value })}
-                    className="w-full bg-black/40 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-white/30 text-sm"
-                    required={field.key !== 'imageUrl'}
-                  />
+            {error && <p className="text-rose-400 text-sm mb-4">{error}</p>}
+            <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-6 items-start">
+              <label className="w-40 h-40 shrink-0 bg-black/40 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-white/30 transition overflow-hidden">
+                {preview ? (
+                  <img src={preview} alt="Vista previa" className="w-full h-full object-cover" />
+                ) : (
+                  <>
+                    <ImageIcon size={28} className="text-white/20 mb-2" />
+                    <span className="text-white/30 text-[10px] uppercase tracking-widest text-center px-2">Elegir foto</span>
+                  </>
+                )}
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+              </label>
+
+              <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { key: 'nombre', label: 'Nombre del producto', type: 'text', placeholder: 'Ej: Camiseta 4A Classic' },
+                  { key: 'precio', label: 'Precio (COP)', type: 'number', placeholder: 'Ej: 80000' },
+                  { key: 'talla', label: 'Tallas disponibles', type: 'text', placeholder: 'Ej: S/M/L/XL' },
+                ].map(field => (
+                  <div key={field.key}>
+                    <label className="block text-white/40 text-xs uppercase tracking-widest mb-2 font-urban">{field.label}</label>
+                    <input
+                      type={field.type}
+                      placeholder={field.placeholder}
+                      value={formData[field.key]}
+                      onChange={e => setFormData({ ...formData, [field.key]: e.target.value })}
+                      className="w-full bg-black/40 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-white/30 text-sm"
+                      required
+                    />
+                  </div>
+                ))}
+                <div className="md:col-span-2 flex gap-3">
+                  <button type="submit" disabled={loading}
+                    className="bg-white text-black px-8 py-3 font-urban text-sm uppercase tracking-widest hover:bg-gray-100 transition rounded-xl disabled:opacity-50">
+                    {loading ? 'Guardando...' : (editingId ? 'Actualizar' : 'Crear Producto')}
+                  </button>
+                  <button type="button" onClick={() => { setShowForm(false); resetForm(); }}
+                    className="bg-white/5 border border-white/10 px-8 py-3 font-urban text-sm uppercase tracking-widest hover:bg-white/10 transition rounded-xl">
+                    Cancelar
+                  </button>
                 </div>
-              ))}
-              <div className="md:col-span-2 flex gap-3">
-                <button type="submit" disabled={loading}
-                  className="bg-white text-black px-8 py-3 font-urban text-sm uppercase tracking-widest hover:bg-gray-100 transition rounded-xl disabled:opacity-50">
-                  {loading ? 'Guardando...' : (editingId ? 'Actualizar' : 'Crear Producto')}
-                </button>
-                <button type="button" onClick={() => setShowForm(false)}
-                  className="bg-white/5 border border-white/10 px-8 py-3 font-urban text-sm uppercase tracking-widest hover:bg-white/10 transition rounded-xl">
-                  Cancelar
-                </button>
+                <p className="md:col-span-2 text-white/20 text-[10px] uppercase tracking-widest">Máximo 5MB por imagen. Si no eliges una foto nueva al editar, se conserva la actual.</p>
               </div>
             </form>
           </motion.div>
@@ -126,11 +176,12 @@ const ProductsManager = () => {
           >
             {/* Imagen */}
             <div className="aspect-video bg-black/40 flex items-center justify-center relative overflow-hidden">
-              {p.imageUrl ? (
-                <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover" />
-              ) : (
-                <img src="/logo.png" alt="4A" className="w-16 h-16 object-contain opacity-10" />
-              )}
+              <img
+                src={`${API_URL}/api/products/${p.id}/image`}
+                alt={p.nombre}
+                className="w-full h-full object-cover"
+                onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; e.target.className = 'w-16 h-16 object-contain opacity-10'; }}
+              />
               {/* Acciones hover */}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-3">
                 <button onClick={() => handleEdit(p)}

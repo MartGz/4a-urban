@@ -33,7 +33,7 @@ const Navbar = () => {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center gap-6"
+            className="fixed inset-0 z-[100] bg-[#18181b] flex flex-col items-center justify-center gap-6"
           >
             <motion.div 
               animate={{ rotate: 360 }} 
@@ -56,7 +56,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      <nav className="fixed top-8 left-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/5">
+      <nav className="fixed top-8 left-0 w-full z-50 bg-[#18181b]/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <Link to="/" className="hover:opacity-80 transition">
             <img src="/logo.png" alt="4A Urban" className="h-10 w-auto object-contain" />
@@ -123,7 +123,7 @@ const Navbar = () => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="md:hidden bg-black overflow-hidden font-urban text-lg uppercase tracking-widest border-b border-white/10"
+              className="md:hidden bg-[#18181b] overflow-hidden font-urban text-lg uppercase tracking-widest border-b border-white/10"
             >
               <div className="p-8 flex flex-col gap-6">
                 <Link to="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-4"><Home size={20} /> Inicio</Link>

@@ -71,9 +71,8 @@ const parseAdminCreate = (msg) => {
   const nombre = parts[0]
   const precio = parseFloat(parts[1].replace(/[^0-9.]/g, ""))
   const talla = parts[2] || "M/L/XL"
-  const imageUrl = parts[3] || ""
   if (!nombre || isNaN(precio)) return null
-  return { nombre, precio, talla, imageUrl }
+  return { nombre, precio, talla }
 }
 
 // ── Markdown bold ───────────────────────────────────────────────────────────────
@@ -121,7 +120,7 @@ const Chatbox = () => {
           setTyping(false)
           if (res.ok) {
             const p = await res.json()
-            addMsg("bot", `Producto creado correctamente:\n\n**${p.nombre}** — $${p.precio.toLocaleString()}\nTallas: ${p.talla}\n\nYa aparece en el catálogo público.`, CheckCircle2)
+            addMsg("bot", `Producto creado correctamente:\n\n**${p.nombre}** — $${p.precio.toLocaleString()}\nTallas: ${p.talla}\n\nYa aparece en el catálogo público. Sube su foto desde **Panel → Productos**.`, CheckCircle2)
           } else {
             addMsg("bot", "Hubo un error al crear el producto. Verifica los datos e inténtalo de nuevo.", XCircle)
           }
@@ -134,7 +133,7 @@ const Chatbox = () => {
       // Ayuda admin
       if (userText.toLowerCase().includes("ayuda") || userText.toLowerCase().includes("como")) {
         setTyping(false)
-        addMsg("bot", "Como administrador puedes crear productos escribiendo:\n\n**crear producto [nombre], [precio], [tallas], [url imagen opcional]**\n\nEjemplo:\n_crear producto Camiseta Classic, 80000, S/M/L_")
+        addMsg("bot", "Como administrador puedes crear productos escribiendo:\n\n**crear producto [nombre], [precio], [tallas]**\n\nEjemplo:\n_crear producto Camiseta Classic, 80000, S/M/L_\n\nLa foto se sube después desde **Panel → Productos**.")
         return
       }
     }
@@ -155,10 +154,10 @@ const Chatbox = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.95 }}
             transition={{ duration: 0.22 }}
-            className="w-[340px] h-[520px] bg-[#0e0e0e] border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            className="w-[340px] h-[520px] bg-[#232326] border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5 bg-black/60">
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5 bg-[#18181b]/60">
               <img src="/logo.png" alt="4A" className="w-9 h-9 object-contain" />
               <div className="flex-1">
                 <p className="text-white font-urban text-sm leading-none">4A Urban</p>

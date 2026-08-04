@@ -66,7 +66,7 @@ const Carrito = () => {
 
   if (items.length === 0) {
     return (
-      <main className="min-h-screen bg-[#080808] text-white flex flex-col items-center justify-center px-6">
+      <main className="min-h-screen bg-[#1c1c1e] text-white flex flex-col items-center justify-center px-6">
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
           className="text-center max-w-md">
           <div className="relative mb-12">
@@ -91,7 +91,7 @@ const Carrito = () => {
   }
 
   return (
-    <main className="min-h-screen bg-[#080808] text-white pt-44 px-6 pb-32">
+    <main className="min-h-screen bg-[#1c1c1e] text-white pt-44 px-6 pb-32">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
           <div>
@@ -122,12 +122,13 @@ const Carrito = () => {
                   transition={{ delay: i * 0.05 }}
                   className="group flex gap-8 bg-white/[0.02] border border-white/5 hover:border-white/10 p-6 transition-all rounded-[32px] items-center"
                 >
-                  <div className="w-32 h-40 bg-[#0c0c0c] border border-white/5 flex items-center justify-center shrink-0 overflow-hidden relative rounded-2xl">
-                    {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.nombre} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    ) : (
-                      <img src="/logo.png" alt="4A" className="w-16 h-16 object-contain opacity-10" />
-                    )}
+                  <div className="w-32 h-40 bg-[#232326] border border-white/5 flex items-center justify-center shrink-0 overflow-hidden relative rounded-2xl">
+                    <img
+                      src={`${API_URL}/api/products/${item.id}/image`}
+                      alt={item.nombre}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; e.target.className = 'w-16 h-16 object-contain opacity-10'; }}
+                    />
                   </div>
 
                   <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-2">
@@ -178,14 +179,13 @@ const Carrito = () => {
                 <div className="grid grid-cols-3 gap-6">
                   {sugerencias.map((p) => (
                     <div key={p.id} className="group relative">
-                      <div className="aspect-[3/4] bg-[#0c0c0c] border border-white/5 rounded-[24px] overflow-hidden mb-4 relative">
-                        {p.imageUrl ? (
-                          <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center opacity-5">
-                            <img src="/logo.png" alt="4A" className="w-16 h-16 object-contain" />
-                          </div>
-                        )}
+                      <div className="aspect-[3/4] bg-[#232326] border border-white/5 rounded-[24px] overflow-hidden mb-4 relative">
+                        <img
+                          src={`${API_URL}/api/products/${p.id}/image`}
+                          alt={p.nombre}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100"
+                          onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; e.target.className = 'w-16 h-16 object-contain opacity-10 mx-auto'; }}
+                        />
                         <button onClick={() => addItem(p)}
                           className="absolute bottom-4 left-4 right-4 bg-white text-black py-3 rounded-xl font-urban text-[9px] uppercase tracking-[0.2em] font-bold opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 flex items-center justify-center gap-2">
                           <Plus size={12} /> Añadir

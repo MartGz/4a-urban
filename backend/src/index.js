@@ -391,7 +391,10 @@ app.delete('/api/staff/:id', authenticateToken, requirePermission('staff.manage'
 // ── Carruseles ───────────────────────────────────────────────────────────────
 app.get('/api/carousels', authenticateToken, requirePermission('gallery.manage'), async (req, res) => {
   const carousels = await prisma.carousel.findMany({
-    include: { _count: { select: { images: true } } },
+    include: {
+      _count: { select: { images: true } },
+      images: { select: { id: true }, orderBy: [{ position: 'asc' }, { createdAt: 'asc' }], take: 4 },
+    },
     orderBy: { createdAt: 'asc' },
   });
   res.json(carousels);
@@ -501,8 +504,26 @@ app.delete('/api/gallery/:id', authenticateToken, requirePermission('gallery.man
 });
 
 app.get('/api/products', async (req, res) => {
-  const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
+  const products = await prisma.product.findMany({
+    orderBy: { createdAt: 'desc' },
+    select: { id: true, nombre: true, precio: true, talla: true, createdAt: true, updatedAt: true },
+  });
   res.json(products);
+});
+
+app.get('/api/products/:id/image', async (req, res) => {
+  const product = await prisma.product.findUnique({
+    where: { id: Number(req.params.id) },
+    select: { imageData: true, imageMimeType: true, imageUrl: true },
+  });
+  if (!product) return res.sendStatus(404);
+  if (product.imageData) {
+    res.set('Content-Type', product.imageMimeType || 'application/octet-stream');
+    res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    return res.send(Buffer.from(product.imageData));
+  }
+  if (product.imageUrl) return res.redirect(302, product.imageUrl);
+  res.sendStatus(404);
 });
 
 const isValidProductPayload = ({ nombre, precio, talla }) =>
@@ -510,17 +531,21 @@ const isValidProductPayload = ({ nombre, precio, talla }) =>
   Number.isFinite(Number(precio)) && Number(precio) > 0 &&
   typeof talla === 'string' && talla.trim().length > 0;
 
-app.post('/api/products', authenticateToken, requirePermission('products.manage'), async (req, res) => {
+app.post('/api/products', authenticateToken, requirePermission('products.manage'), upload.single('image'), async (req, res) => {
   if (!isValidProductPayload(req.body)) return res.status(400).json({ error: 'Datos de producto inválidos' });
-  const { nombre, precio, talla, imageUrl } = req.body;
-  const newProduct = await prisma.product.create({ data: { nombre, precio: Number(precio), talla, imageUrl } });
+  const { nombre, precio, talla } = req.body;
+  const data = { nombre, precio: Number(precio), talla };
+  if (req.file) { data.imageData = req.file.buffer; data.imageMimeType = req.file.mimetype; }
+  const newProduct = await prisma.product.create({ data });
   res.status(201).json(newProduct);
 });
 
-app.put('/api/products/:id', authenticateToken, requirePermission('products.manage'), async (req, res) => {
+app.put('/api/products/:id', authenticateToken, requirePermission('products.manage'), upload.single('image'), async (req, res) => {
   if (!isValidProductPayload(req.body)) return res.status(400).json({ error: 'Datos de producto inválidos' });
-  const { nombre, precio, talla, imageUrl } = req.body;
-  const updated = await prisma.product.update({ where: { id: Number(req.params.id) }, data: { nombre, precio: Number(precio), talla, imageUrl } });
+  const { nombre, precio, talla } = req.body;
+  const data = { nombre, precio: Number(precio), talla };
+  if (req.file) { data.imageData = req.file.buffer; data.imageMimeType = req.file.mimetype; }
+  const updated = await prisma.product.update({ where: { id: Number(req.params.id) }, data });
   res.json(updated);
 });
 
@@ -560,13 +585,15 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
   } catch (err) { console.error(err); res.status(500).json({ error: 'Error' }); }
 });
 
+const productSummarySelect = { id: true, nombre: true, precio: true, talla: true };
+
 app.get('/api/orders/me', authenticateToken, async (req, res) => {
-  const orders = await prisma.order.findMany({ where: { userId: req.user.id }, include: { items: { include: { product: true } } }, orderBy: { createdAt: 'desc' } });
+  const orders = await prisma.order.findMany({ where: { userId: req.user.id }, include: { items: { include: { product: { select: productSummarySelect } } } }, orderBy: { createdAt: 'desc' } });
   res.json(orders);
 });
 
 app.get('/api/orders', authenticateToken, requirePermission('orders.manage'), async (req, res) => {
-  const orders = await prisma.order.findMany({ include: { user: { select: { name: true, email: true } }, items: { include: { product: true } } }, orderBy: { createdAt: 'desc' } });
+  const orders = await prisma.order.findMany({ include: { user: { select: { name: true, email: true } }, items: { include: { product: { select: productSummarySelect } } } }, orderBy: { createdAt: 'desc' } });
   res.json(orders);
 });
 

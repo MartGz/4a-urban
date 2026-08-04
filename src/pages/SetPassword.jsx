@@ -43,14 +43,14 @@ const SetPassword = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-[#080808] flex items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-[#1c1c1e] flex items-center justify-center px-6 text-center">
         <p className="text-white/40 font-urban text-sm uppercase tracking-widest">Enlace inválido o incompleto.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#080808] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#1c1c1e] flex items-center justify-center px-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
         {done ? (
           <div className="text-center">

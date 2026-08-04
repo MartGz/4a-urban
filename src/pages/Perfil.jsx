@@ -101,13 +101,13 @@ const Perfil = () => {
     }
   }
 
-  if (loading) return <div className="min-h-screen bg-[#080808] pt-44 px-6 text-white/30 font-urban uppercase tracking-widest animate-pulse flex items-center justify-center">Sincronizando...</div>
-  if (!user) return <div className="min-h-screen bg-[#080808] pt-44 px-6 text-white/30 font-urban uppercase tracking-widest flex items-center justify-center">Error al cargar datos.</div>
+  if (loading) return <div className="min-h-screen bg-[#1c1c1e] pt-44 px-6 text-white/30 font-urban uppercase tracking-widest animate-pulse flex items-center justify-center">Sincronizando...</div>
+  if (!user) return <div className="min-h-screen bg-[#1c1c1e] pt-44 px-6 text-white/30 font-urban uppercase tracking-widest flex items-center justify-center">Error al cargar datos.</div>
 
   const isAdmin = isSuperAdmin || permissions.length > 0
 
   return (
-    <main className="min-h-screen bg-[#080808] text-white pt-44 px-6 pb-32 relative overflow-hidden">
+    <main className="min-h-screen bg-[#1c1c1e] text-white pt-44 px-6 pb-32 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-1/3 h-1/2 bg-white/[0.01] blur-[150px] rounded-full -translate-y-1/2 -translate-x-1/2" />
       
       <div className="max-w-6xl mx-auto relative z-10">
@@ -217,8 +217,8 @@ const Perfil = () => {
 
       <AnimatePresence>
         {resetStep > 0 && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
-             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#0c0c0c] border border-white/10 w-full max-w-xl rounded-[56px] p-16 relative overflow-hidden shadow-2xl">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#18181b]/90 backdrop-blur-md">
+             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#232326] border border-white/10 w-full max-w-xl rounded-[56px] p-16 relative overflow-hidden shadow-2xl">
                 <button onClick={() => setResetStep(0)} className="absolute top-12 right-12 text-white/30 hover:text-white transition-all hover:rotate-90 duration-300 flex items-center justify-center w-10 h-10 bg-white/5 rounded-full"><X size={20} /></button>
                 {resetStep === 1 && (
                   <div className="text-center">

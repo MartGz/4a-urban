@@ -2,14 +2,14 @@
 
 @theme {
   --color-militar: #252d28;
-  --color-dark: #080808;
+  --color-dark: #1c1c1e;
   --color-logo: #a9a9a9;
   --font-urban: "Bebas Neue", sans-serif;
   --font-body: "Inter", sans-serif;
 }
 
 :root {
-  background-color: #080808;
+  background-color: #1c1c1e;
   color: white;
 }
 
@@ -35,14 +35,14 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #080808;
+  background: #1c1c1e;
 }
 ::-webkit-scrollbar-thumb {
-  background: #222;
+  background: #3a3a3d;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #333;
+  background: #4a4a4e;
 }
 
 .scrollbar-hide::-webkit-scrollbar {

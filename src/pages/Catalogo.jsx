@@ -37,7 +37,7 @@ const Catalogo = () => {
   })
 
   return (
-    <main className="min-h-screen bg-[#080808] text-white">
+    <main className="min-h-screen bg-[#1c1c1e] text-white">
 
       {/* ══ HERO BANNER ══ */}
       <section className="relative pt-44 pb-16 px-6 overflow-hidden">
@@ -108,31 +108,22 @@ const Catalogo = () => {
                     onClick={() => setSelectedProduct(p)}
                     className="group cursor-pointer relative"
                   >
-                    <div className="relative aspect-[3/4] bg-[#0c0c0c] overflow-hidden rounded-[32px] border border-white/5">
-                      {p.imageUrl ? (
-                        <motion.img src={p.imageUrl} alt={p.nombre}
-                          animate={{ scale: hovered === p.id ? 1.08 : 1 }}
-                          transition={{ duration: 0.6 }}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <motion.img src="/logo.png" alt="4A Urban"
-                            animate={{ scale: hovered === p.id ? 1.2 : 1, opacity: hovered === p.id ? 0.3 : 0.08 }}
-                            transition={{ duration: 0.6 }}
-                            className="w-24 h-24 object-contain"
-                          />
-                        </div>
-                      )}
+                    <div className="relative aspect-[3/4] bg-[#232326] overflow-hidden rounded-[32px] border border-white/5 flex items-center justify-center">
+                      <motion.img src={`${API_URL}/api/products/${p.id}/image`} alt={p.nombre}
+                        animate={{ scale: hovered === p.id ? 1.08 : 1 }}
+                        transition={{ duration: 0.6 }}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; e.target.className = 'w-24 h-24 object-contain opacity-10'; }}
+                      />
 
-                      <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full">
+                      <div className="absolute top-4 left-4 bg-[#18181b]/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full">
                         <span className="font-urban text-white/50 text-[9px] uppercase tracking-widest">{p.talla}</span>
                       </div>
 
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: hovered === p.id ? 1 : 0 }}
-                        className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col justify-end p-6"
+                        className="absolute inset-0 bg-[#18181b]/40 backdrop-blur-[2px] flex flex-col justify-end p-6"
                       >
                         <div className="flex gap-2">
                            <button onClick={(e) => handleAdd(e, p)}
@@ -168,13 +159,13 @@ const Catalogo = () => {
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-10">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setSelectedProduct(null)}
-              className="absolute inset-0 bg-black/95 backdrop-blur-xl"
+              className="absolute inset-0 bg-[#18181b]/95 backdrop-blur-xl"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="relative w-full max-w-5xl bg-[#0a0a0a] border border-white/10 overflow-hidden flex flex-col md:flex-row shadow-2xl rounded-[48px]"
+              className="relative w-full max-w-5xl bg-[#232326] border border-white/10 overflow-hidden flex flex-col md:flex-row shadow-2xl rounded-[48px]"
             >
               <button onClick={() => setSelectedProduct(null)}
                 className="absolute top-8 right-8 z-20 w-12 h-12 bg-white/5 text-white/50 flex items-center justify-center rounded-full hover:bg-white/10 hover:text-white transition">
@@ -182,14 +173,13 @@ const Catalogo = () => {
               </button>
 
               {/* Imagen Izquierda */}
-              <div className="w-full md:w-1/2 aspect-[3/4] bg-[#0c0c0c] border-r border-white/5">
-                {selectedProduct.imageUrl ? (
-                  <img src={selectedProduct.imageUrl} alt={selectedProduct.nombre} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <img src="/logo.png" alt="4A" className="w-44 h-44 object-contain opacity-10" />
-                  </div>
-                )}
+              <div className="w-full md:w-1/2 aspect-[3/4] bg-[#232326] border-r border-white/5 flex items-center justify-center">
+                <img
+                  src={`${API_URL}/api/products/${selectedProduct.id}/image`}
+                  alt={selectedProduct.nombre}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.onerror = null; e.target.src = '/logo.png'; e.target.className = 'w-44 h-44 object-contain opacity-10'; }}
+                />
               </div>
 
               {/* Info Derecha */}

@@ -128,7 +128,26 @@ const CarouselsManager = () => {
                 <p className="text-white/20 text-[10px] uppercase tracking-widest mt-1">{c._count.images} foto(s)</p>
               </div>
             </div>
-            <p className="text-white/20 text-[10px] font-mono mb-5">slug: {c.slug}</p>
+            <p className="text-white/20 text-[10px] font-mono mb-4">slug: {c.slug}</p>
+
+            {c.images.length > 0 ? (
+              <Link to={`/admin/galeria/${c.id}`} className="grid grid-cols-4 gap-1.5 mb-5">
+                {c.images.map((img) => (
+                  <div key={img.id} className="aspect-square rounded-lg overflow-hidden bg-black/40">
+                    <img src={`${API_URL}/api/gallery/${img.id}/image`} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+                {Array.from({ length: Math.max(0, 4 - c.images.length) }).map((_, i) => (
+                  <div key={`ph-${i}`} className="aspect-square rounded-lg bg-white/[0.03] border border-dashed border-white/10" />
+                ))}
+              </Link>
+            ) : (
+              <Link to={`/admin/galeria/${c.id}`}
+                className="mb-5 flex items-center justify-center h-16 rounded-lg bg-white/[0.03] border border-dashed border-white/10 text-white/15 text-[10px] uppercase tracking-widest hover:border-white/20 hover:text-white/30 transition">
+                Sin fotos — súbelas aquí
+              </Link>
+            )}
+
             <div className="flex gap-3">
               <Link to={`/admin/galeria/${c.id}`}
                 className="flex-1 bg-white/5 border border-white/10 text-white px-4 py-2.5 font-urban text-xs uppercase tracking-widest rounded-lg hover:bg-white/10 transition flex items-center justify-center gap-2">
